@@ -1,3 +1,5 @@
+# noinspection SqlNoDataSourceInspectionForFile
+
 CREATE TABLE `users` (
   `name` varchar(25),
   `password` varchar(30) NOT NULL,
