@@ -39,8 +39,8 @@ public class DependencyContainer {
         );
     }
 
-    public static DataSource dataSource() {
-        return DB_SOURCE;
+    public static ThreadLocal<Long> requestTimer() {
+        return REQUEST_TIMER;
     }
 
     public static ThreadLocal<Integer> queryCounter() {

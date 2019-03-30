@@ -38,5 +38,6 @@
         </div>
     </div>
 </form>
+<jsp:include page="/techInfo" />
 </body>
 </html>
