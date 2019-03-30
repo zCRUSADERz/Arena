@@ -16,11 +16,11 @@ public class MainPage extends HttpServlet {
                 .getRequestDispatcher("/WEB-INF/views/Arena.jsp")
                 .forward(req, resp);
     }
-/*
+
     @Override
     protected final void doPost(final HttpServletRequest req,
                                 final HttpServletResponse resp)
             throws ServletException, IOException {
         this.doGet(req, resp);
-    }*/
+    }
 }

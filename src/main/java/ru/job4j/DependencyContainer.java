@@ -7,8 +7,7 @@ import ru.job4j.db.DataSourceWrapper;
 import ru.job4j.db.StatementHandler;
 import ru.job4j.domain.Users;
 import ru.job4j.domain.UsersAuthentication;
-
-import javax.sql.DataSource;
+import ru.job4j.domain.UsersQueue;
 
 public class DependencyContainer {
     private final static HikariDataSource DB_SOURCE;
@@ -16,6 +15,7 @@ public class DependencyContainer {
     private final static ThreadLocal<Long> QUERY_TIMER;
     private final static ThreadLocal<Long> REQUEST_TIMER;
     private final static UsersAuthentication USERS_AUTHENTICATION;
+    private final static UsersQueue USERS_QUEUE;
 
     static {
         QUERY_COUNTER = ThreadLocal.withInitial(() -> 0);
@@ -37,6 +37,7 @@ public class DependencyContainer {
                         DB_SOURCE
                 )
         );
+        USERS_QUEUE = new UsersQueue(DB_SOURCE);
     }
 
     public static ThreadLocal<Long> requestTimer() {
@@ -53,5 +54,9 @@ public class DependencyContainer {
 
     public static UsersAuthentication usersAuthentication() {
         return USERS_AUTHENTICATION;
+    }
+
+    public static UsersQueue usersQueue() {
+        return USERS_QUEUE;
     }
 }

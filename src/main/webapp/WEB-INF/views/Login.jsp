@@ -38,6 +38,6 @@
         </div>
     </div>
 </form>
-<jsp:include page="/techInfo" />
+<p align="center" ><jsp:include page="/techInfo" /></p>
 </body>
 </html>
