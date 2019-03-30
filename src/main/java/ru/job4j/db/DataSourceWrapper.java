@@ -23,7 +23,7 @@ public class DataSourceWrapper extends HikariDataSource {
     public final Connection getConnection() throws SQLException {
         return (Connection) Proxy.newProxyInstance(
                 Connection.class.getClassLoader(),
-                new Class[] { Connection.class },
+                new Class[] {Connection.class},
                 this.handlerFactory.apply(super.getConnection())
         );
 

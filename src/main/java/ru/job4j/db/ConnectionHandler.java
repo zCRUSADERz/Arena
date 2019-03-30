@@ -27,7 +27,7 @@ public class ConnectionHandler implements InvocationHandler {
         if (method.getName().equals("createStatement")) {
             result = Proxy.newProxyInstance(
                     Statement.class.getClassLoader(),
-                    new Class[] { Statement.class },
+                    new Class[] {Statement.class},
                     this.handlerFactory.apply(
                             (Statement) method.invoke(original, args)
                     )
@@ -35,7 +35,7 @@ public class ConnectionHandler implements InvocationHandler {
         } else if (method.getName().equals("prepareStatement")) {
             result = Proxy.newProxyInstance(
                     PreparedStatement.class.getClassLoader(),
-                    new Class[] { PreparedStatement.class },
+                    new Class[] {PreparedStatement.class},
                     this.handlerFactory.apply(
                             (PreparedStatement) method.invoke(original, args)
                     )
