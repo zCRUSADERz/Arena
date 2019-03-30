@@ -33,6 +33,8 @@ public class SignIn extends HttpServlet {
         if (errors.isEmpty()) {
             HttpSession session = req.getSession();
             session.setAttribute("userName", user.name());
+            req.getRequestDispatcher("/arena")
+                    .forward(req, resp);
         } else {
             errors.forEach(req::setAttribute);
             req.getRequestDispatcher("/WEB-INF/views/Login.jsp")
