@@ -13,12 +13,21 @@ public class UsersQueue {
     }
 
     public final void offer(final String userName) {
-        final String select = "INSERT INTO users_queue (user_name) VALUES (?)";
-        try (final Connection conn = this.dataSource.getConnection()) {
-            try (final PreparedStatement statement = conn.prepareStatement(select)) {
-                statement.setString(1, userName);
-                statement.executeUpdate();
-            }
+        final String insert = "INSERT INTO users_queue (user_name) VALUES (?)";
+        execute(userName, insert);
+    }
+
+    public final void poll(final String userName) {
+        final String delete =
+                "DELETE FROM users_queue WHERE users_queue.user_name = ?";
+        execute(userName, delete);
+    }
+
+    private void execute(String userName, String query) {
+        try (final Connection conn = this.dataSource.getConnection();
+             final PreparedStatement statement = conn.prepareStatement(query)) {
+            statement.setString(1, userName);
+            statement.execute();
         } catch (final SQLException ex) {
             throw new IllegalStateException(ex);
         }

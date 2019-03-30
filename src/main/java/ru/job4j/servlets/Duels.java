@@ -23,9 +23,18 @@ public class Duels extends HttpServlet {
 
     @Override
     protected final void doPost(final HttpServletRequest req,
-                                final HttpServletResponse resp) {
+                                final HttpServletResponse resp)
+            throws ServletException, IOException {
         HttpSession session = req.getSession();
-        this.queue.offer((String) session.getAttribute("userName"));
+        final String action = req.getParameter("action");
+        if ("start".equals(action)) {
+            this.queue.offer((String) session.getAttribute("userName"));
+            session.setAttribute("waitingFight", true);
+        } else if ("cancel".equals(action)) {
+            this.queue.poll((String) session.getAttribute("userName"));
+            session.removeAttribute("waitingFight");
+            this.doGet(req, resp);
+        }
     }
 
     @Override
