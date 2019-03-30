@@ -19,20 +19,20 @@ public class Users {
     public final Optional<User> user(final String name) {
         final Optional<User> result;
         final String select = "SELECT name, password FROM users WHERE name = ?";
-        try (final Connection conn = this.dataSource.getConnection()) {
-            try (final PreparedStatement statement = conn.prepareStatement(select)) {
-                statement.setString(1, name);
-                try (final ResultSet resultSet = statement.executeQuery()) {
-                    if (resultSet.next()) {
-                        result = Optional.of(new RegisteredUser(
-                                resultSet.getString(1),
-                                resultSet.getString(2)
-                        ));
-                    } else {
-                        result = Optional.empty();
-                    }
+        try (final Connection conn = this.dataSource.getConnection();
+             final PreparedStatement statement = conn.prepareStatement(select)) {
+            statement.setString(1, name);
+            try (final ResultSet resultSet = statement.executeQuery()) {
+                if (resultSet.next()) {
+                    result = Optional.of(new RegisteredUser(
+                            resultSet.getString(1),
+                            resultSet.getString(2)
+                    ));
+                } else {
+                    result = Optional.empty();
                 }
             }
+
         } catch (final SQLException ex) {
             throw new IllegalStateException(ex);
         }
@@ -41,17 +41,16 @@ public class Users {
 
     public final Map<String, String> register(final User user) {
         final Map<String, String> errors;
-        final String select = "INSERT INTO users (name, password) VALUES (?, ?)";
-        try (final Connection conn = this.dataSource.getConnection()) {
-            try (final PreparedStatement statement = conn.prepareStatement(select)) {
-                statement.setString(1, user.name());
-                statement.setString(2, user.password());
-                final int rows = statement.executeUpdate();
-                if (rows != 1) {
-                    errors = Map.of("name", "Username is already taken");
-                } else {
-                    errors = Collections.emptyMap();
-                }
+        final String insert = "INSERT INTO users (name, password) VALUES (?, ?)";
+        try (final Connection conn = this.dataSource.getConnection();
+             final PreparedStatement statement = conn.prepareStatement(insert)) {
+            statement.setString(1, user.name());
+            statement.setString(2, user.password());
+            final int rows = statement.executeUpdate();
+            if (rows != 1) {
+                errors = Map.of("name", "Username is already taken");
+            } else {
+                errors = Collections.emptyMap();
             }
         } catch (final SQLException ex) {
             throw new IllegalStateException(ex);
