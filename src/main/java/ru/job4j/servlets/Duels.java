@@ -28,16 +28,18 @@ public class Duels extends HttpServlet {
             throws ServletException, IOException {
         HttpSession session = req.getSession();
         final String action = req.getParameter("action");
-        if ("start".equals(action)) {
+        if ("start".equals(action)
+                && !((boolean) session.getAttribute("waitingFight"))) {
             try {
                 this.queue.offer((String) session.getAttribute("userName"));
             } catch (InterruptedException ex) {
                 throw new IllegalStateException(ex);
             }
             session.setAttribute("waitingFight", true);
+            this.doGet(req, resp);
         } else if ("cancel".equals(action)) {
             this.queue.remove((String) session.getAttribute("userName"));
-            session.removeAttribute("waitingFight");
+            session.setAttribute("waitingFight", false);
             this.doGet(req, resp);
         }
     }
