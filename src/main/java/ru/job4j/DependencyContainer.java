@@ -5,9 +5,7 @@ import ru.job4j.db.ConnectionHandler;
 import ru.job4j.db.DBConfig;
 import ru.job4j.db.DataSourceWrapper;
 import ru.job4j.db.StatementHandler;
-import ru.job4j.domain.Users;
-import ru.job4j.domain.UsersAuthentication;
-import ru.job4j.domain.UsersQueue;
+import ru.job4j.domain.*;
 
 public class DependencyContainer {
     private final static HikariDataSource DB_SOURCE;
@@ -37,7 +35,15 @@ public class DependencyContainer {
                         DB_SOURCE
                 )
         );
-        USERS_QUEUE = new UsersQueue(DB_SOURCE);
+        USERS_QUEUE = new UsersQueue();
+        final String defaultUserName = "";
+        new Thread(
+                new UsersQueueConsumer(
+                        usersQueue(),
+                        new Duels(),
+                        defaultUserName
+                )
+        ).start();
     }
 
     public static ThreadLocal<Long> requestTimer() {

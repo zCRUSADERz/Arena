@@ -3,13 +3,13 @@
 <html>
 <head>
     <title>Duels</title>
-    <c:if test="${empty sessionScope.waitingFight}">
+    <c:if test="${not empty sessionScope.waitingFight}">
         <meta http-equiv="refresh" content="10">
     </c:if>
 </head>
 <body>
 <c:choose>
-    <c:when test="${not empty sessionScope.waitingFight}">
+    <c:when test="${empty sessionScope.waitingFight}">
         <form action="${pageContext.request.contextPath}/arena/duels" method="post">
             <input type="hidden" name="action" value="start">
             <input type="submit" value="Начать">

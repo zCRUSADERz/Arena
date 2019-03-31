@@ -15,7 +15,8 @@ public class Duels extends HttpServlet {
 
     @Override
     protected final void doGet(final HttpServletRequest req,
-                               final HttpServletResponse resp) throws ServletException, IOException {
+                               final HttpServletResponse resp)
+            throws ServletException, IOException {
         this.getServletContext()
                 .getRequestDispatcher("/WEB-INF/views/Duels.jsp")
                 .forward(req, resp);
@@ -28,17 +29,21 @@ public class Duels extends HttpServlet {
         HttpSession session = req.getSession();
         final String action = req.getParameter("action");
         if ("start".equals(action)) {
-            this.queue.offer((String) session.getAttribute("userName"));
+            try {
+                this.queue.offer((String) session.getAttribute("userName"));
+            } catch (InterruptedException ex) {
+                throw new IllegalStateException(ex);
+            }
             session.setAttribute("waitingFight", true);
         } else if ("cancel".equals(action)) {
-            this.queue.poll((String) session.getAttribute("userName"));
+            this.queue.remove((String) session.getAttribute("userName"));
             session.removeAttribute("waitingFight");
             this.doGet(req, resp);
         }
     }
 
     @Override
-    public void init() throws ServletException {
+    public final void init() throws ServletException {
         super.init();
         this.queue = DependencyContainer.usersQueue();
     }
