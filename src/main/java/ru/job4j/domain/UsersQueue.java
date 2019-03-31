@@ -1,35 +1,55 @@
 package ru.job4j.domain;
 
-import javax.sql.DataSource;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 public class UsersQueue {
-    private final DataSource dataSource;
+    private final LinkedBlockingQueue<String> queue;
+    private final ConcurrentLinkedQueue<UserNameHolder> usersInThreads;
 
-    public UsersQueue(final DataSource dataSource) {
-        this.dataSource = dataSource;
+    public UsersQueue() {
+        this(new LinkedBlockingQueue<>(), new ConcurrentLinkedQueue<>());
     }
 
-    public final void offer(final String userName) {
-        final String insert = "INSERT INTO users_queue (user_name) VALUES (?)";
-        execute(userName, insert);
+    public UsersQueue(
+            final LinkedBlockingQueue<String> queue,
+            final ConcurrentLinkedQueue<UserNameHolder> usersInThreads) {
+        this.queue = queue;
+        this.usersInThreads = usersInThreads;
     }
 
-    public final void poll(final String userName) {
-        final String delete =
-                "DELETE FROM users_queue WHERE users_queue.user_name = ?";
-        execute(userName, delete);
+    public final void offer(final String userName) throws InterruptedException {
+        this.queue.put(userName);
     }
 
-    private void execute(String userName, String query) {
-        try (final Connection conn = this.dataSource.getConnection();
-             final PreparedStatement statement = conn.prepareStatement(query)) {
-            statement.setString(1, userName);
-            statement.execute();
-        } catch (final SQLException ex) {
-            throw new IllegalStateException(ex);
+    public final String poll() throws InterruptedException {
+        return this.queue.take();
+    }
+
+    public final boolean find(final String userName) {
+        for (String name : this.queue) {
+            if (name.equals(userName)) {
+                return true;
+            }
         }
+        for (UserNameHolder holder : this.usersInThreads) {
+            if (holder.name().equals(userName)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public final void remove(final String userName) {
+        this.usersInThreads.forEach(holder -> holder.remove(userName));
+        this.queue.remove(userName);
+    }
+
+    public final void addHolder(final UserNameHolder holder) {
+        this.usersInThreads.add(holder);
+    }
+
+    public final void removeHolder(final UserNameHolder holder) {
+        this.usersInThreads.remove(holder);
     }
 }
