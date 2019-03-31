@@ -40,7 +40,7 @@ public class DependencyContainer {
         new Thread(
                 new UsersQueueConsumer(
                         usersQueue(),
-                        new Duels(),
+                        new Duels(DB_SOURCE),
                         defaultUserName
                 )
         ).start();
