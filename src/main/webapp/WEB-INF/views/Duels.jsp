@@ -10,21 +10,21 @@
 <body>
 <c:choose>
     <c:when test="${sessionScope.waitingFight}">
-        <p>Ведется побор соперника. Для отмены нажмите "Выйти".</p>
+        <p align="center">Ведется побор соперника. Для отмены нажмите "Выйти".</p>
         <form action="${pageContext.request.contextPath}/arena/duels" method="get">
-            <input type="submit" value="Обновить">
+            <input type="submit" value="Обновить" align="center">
         </form>
         <form action="${pageContext.request.contextPath}/arena/duels" method="post">
-            <input type="hidden" name="action" value="cancel">
-            <input type="submit" value="Выйти">
+            <input type="hidden" name="action" value="cancel" align="center">
+            <input type="submit" value="Выйти" align="center">
         </form>
     </c:when>
     <c:otherwise>
         <form action="${pageContext.request.contextPath}/arena/duels" method="post">
-            <input type="hidden" name="action" value="start">
-            <input type="submit" value="Начать">
+            <input type="hidden" name="action" value="start" align="center">
+            <input type="submit" value="Начать" align="center">
         </form>
-        <p><a href="${pageContext.request.contextPath}/arena">Главное меню</a></p>
+        <p align="center"><a href="${pageContext.request.contextPath}/arena">Главное меню</a></p>
     </c:otherwise>
 </c:choose>
 <p align="center" ><jsp:include page="/techInfo" /></p>
