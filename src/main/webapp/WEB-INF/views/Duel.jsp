@@ -35,6 +35,20 @@
         <td>Жизни:</td>
         <td>${requestScope.opponentHealth}</td>
     </tr>
+    <tr>
+        <td>
+            <form action="${requestScope.contextPath}/arena/duel" method="get">
+                <input type="submit" value="Обновить" align="center">
+            </form>
+        </td>
+        <c:if test="${requestScope.canAttack}" >
+            <td>
+                <form action="${requestScope.contextPath}/arena/duel" method="post">
+                    <input type="submit" value="Атаковать" align="center">
+                </form>
+            </td>
+        </c:if>
+    </tr>
     </tbody>
 </table>
 <p align="center"><jsp:include page="/techInfo" /></p>

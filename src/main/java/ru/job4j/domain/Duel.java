@@ -2,6 +2,7 @@ package ru.job4j.domain;
 
 import java.sql.Timestamp;
 import java.util.Collection;
+import java.util.Optional;
 
 public class Duel {
     /**
@@ -37,7 +38,17 @@ public class Duel {
         return (int) result;
     }
 
-    public final Collection<Duelist> duelists() {
-        return this.duelists;
+    public final Duelist duelist(final String userName) {
+        final Optional<Duelist> result = this.duelists.stream()
+                .filter(duelist -> duelist.name().equals(userName))
+                .findAny();
+        return result.orElseThrow();
+    }
+
+    public final Duelist opponent(final String userName) {
+        final Optional<Duelist> result = this.duelists.stream()
+                .filter(duelist -> !duelist.name().equals(userName))
+                .findAny();
+        return result.orElseThrow();
     }
 }

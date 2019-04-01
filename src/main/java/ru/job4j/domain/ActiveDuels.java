@@ -45,14 +45,12 @@ public class ActiveDuels {
                                             resultSet.getInt("us1.damage"),
                                             resultSet.getInt("ud1.health"),
                                             resultSet.getTimestamp("ud1.last_activity")
-                                                    .toLocalDateTime()
                                     ),
                                     new Duelist(
                                             resultSet.getString("ud2.user_name"),
                                             resultSet.getInt("us2.damage"),
                                             resultSet.getInt("ud2.health"),
                                             resultSet.getTimestamp("ud2.last_activity")
-                                                    .toLocalDateTime()
                                     )
                             )
                     );

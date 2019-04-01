@@ -11,7 +11,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
-import java.util.Collection;
 
 public class DuelPage extends HttpServlet {
     private ActiveDuels activeDuels;
@@ -23,22 +22,21 @@ public class DuelPage extends HttpServlet {
         HttpSession session = req.getSession();
         final String userName = (String) session.getAttribute("userName");
         final Duel duel = this.activeDuels.duel(userName);
-        if (!duel.started()) {
+        final Duelist user = duel.duelist(userName);
+        req.setAttribute("yourName", user.name());
+        req.setAttribute("yourDamage", user.damage());
+        req.setAttribute("yourHealth", user.health());
+        final Duelist opponent = duel.opponent(userName);
+        req.setAttribute("opponentName", opponent.name());
+        req.setAttribute("opponentDamage", opponent.damage());
+        req.setAttribute("opponentHealth", opponent.health());
+        if (duel.started()) {
+            if (user.canAttack(opponent)) {
+                req.setAttribute("canAttack", true);
+            }
+        } else {
             req.setAttribute("timer", duel.timer());
         }
-        final Collection<Duelist> duelists = duel.duelists();
-        duelists.forEach(duelist -> {
-            final String duelistName = duelist.name();
-            if (userName.equals(duelistName)) {
-                req.setAttribute("yourName", duelistName);
-                req.setAttribute("yourDamage", duelist.damage());
-                req.setAttribute("yourHealth", duelist.health());
-            } else {
-                req.setAttribute("opponentName", duelistName);
-                req.setAttribute("opponentDamage", duelist.damage());
-                req.setAttribute("opponentHealth", duelist.health());
-            }
-        });
         req.getRequestDispatcher("/WEB-INF/views/Duel.jsp")
                 .forward(req, resp);
     }

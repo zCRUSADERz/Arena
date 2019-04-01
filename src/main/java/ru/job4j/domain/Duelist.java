@@ -1,15 +1,26 @@
 package ru.job4j.domain;
 
-import java.time.LocalDateTime;
+import java.sql.Timestamp;
 
 public class Duelist {
     private final String name;
     private final int damage;
     private final int health;
-    private final LocalDateTime lastActivity;
+    /**
+     * Date of last player activity in seconds
+     */
+    private final long lastActivity;
 
     public Duelist(final String name, final int damage, final int health,
-                   final LocalDateTime lastActivity) {
+                   final Timestamp lastActivity) {
+        this(
+                name, damage, health,
+                Math.floorDiv(lastActivity.getTime(), 1000)
+        );
+    }
+
+    public Duelist(final String name, final int damage, final int health,
+                   final long lastActivity) {
         this.name = name;
         this.damage = damage;
         this.health = health;
@@ -28,7 +39,8 @@ public class Duelist {
         return this.health;
     }
 
-    public final LocalDateTime lastActivity() {
-        return this.lastActivity;
+    public final boolean canAttack(final Duelist other) {
+        final long time = this.lastActivity - other.lastActivity;
+        return time <= 0 || time >= 10;
     }
 }
