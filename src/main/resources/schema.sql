@@ -50,9 +50,15 @@ INSERT INTO users_in_duels (user_name, duel_id, health)
 SELECT name, 1 AS duel_id, health FROM users
 WHERE name = 'Alexander';
 
-DELETE FROM users_in_duels;
-
-SELECT d.created, CURRENT_TIMESTAMP() AS now
-FROM users_in_duels AS u
-  JOIN duels AS d
-    ON u.user_name = 'Alexander' AND u.duel_id = d.id;
+SELECT ud1.user_name, ud1.last_activity, ud1.health, us1.damage,
+       d.id, d.created, CURRENT_TIMESTAMP() AS now,
+       ud2.user_name, ud2.last_activity, ud2.health, us2.damage
+FROM users_in_duels AS ud1
+       JOIN users AS us1
+            ON ud1.user_name = us1.name AND us1.name = 'Alexander'
+       JOIN duels AS d
+            ON ud1.duel_id = d.id
+       JOIN users_in_duels AS ud2
+            ON ud2.duel_id = d.id AND ud2.user_name != 'Alexander'
+       JOIN users AS us2
+            ON ud2.user_name = us2.name;
