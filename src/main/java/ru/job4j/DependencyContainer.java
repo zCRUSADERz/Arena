@@ -14,6 +14,7 @@ public class DependencyContainer {
     private final static ThreadLocal<Long> REQUEST_TIMER;
     private final static UsersAuthentication USERS_AUTHENTICATION;
     private final static UsersQueue USERS_QUEUE;
+    private final static ActiveDuels ACTIVE_DUELS;
 
     static {
         QUERY_COUNTER = ThreadLocal.withInitial(() -> 0);
@@ -44,6 +45,7 @@ public class DependencyContainer {
                         defaultUserName
                 )
         ).start();
+        ACTIVE_DUELS = new ActiveDuels();
     }
 
     public static ThreadLocal<Long> requestTimer() {
@@ -64,5 +66,9 @@ public class DependencyContainer {
 
     public static UsersQueue usersQueue() {
         return USERS_QUEUE;
+    }
+
+    public static ActiveDuels activeDuels() {
+        return ACTIVE_DUELS;
     }
 }

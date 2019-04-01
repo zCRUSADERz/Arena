@@ -67,8 +67,21 @@
     <filter-mapping>
         <filter-name>AuthFilter</filter-name>
         <url-pattern>/arena/*</url-pattern>
+        <url-pattern>/logOut</url-pattern>
         <dispatcher>REQUEST</dispatcher>
     </filter-mapping>
+
+    <filter>
+        <filter-name>FightingFilter</filter-name>
+        <filter-class>ru.job4j.filters.FightingFilter</filter-class>
+    </filter>
+    <filter-mapping>
+        <filter-name>FightingFilter</filter-name>
+        <url-pattern>/arena/*</url-pattern>
+        <url-pattern>/logOut</url-pattern>
+        <dispatcher>REQUEST</dispatcher>
+    </filter-mapping>
+
     <filter>
         <filter-name>WaitingFightFilter</filter-name>
         <filter-class>ru.job4j.filters.WaitingFightFilter</filter-class>
@@ -76,7 +89,7 @@
     <filter-mapping>
         <filter-name>WaitingFightFilter</filter-name>
         <url-pattern>/arena/*</url-pattern>
+        <url-pattern>/logOut</url-pattern>
         <dispatcher>REQUEST</dispatcher>
-        <dispatcher>FORWARD</dispatcher>
     </filter-mapping>
 </web-app>
