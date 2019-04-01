@@ -4,35 +4,15 @@ import ru.job4j.DependencyContainer;
 import ru.job4j.domain.UsersQueue;
 
 import javax.servlet.*;
+import javax.servlet.http.HttpFilter;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
+import java.util.Optional;
 
-public class WaitingFightFilter implements Filter {
+public class WaitingFightFilter extends HttpFilter {
     private UsersQueue usersQueue;
-
-    @Override
-    public final void doFilter(final ServletRequest request,
-                               final ServletResponse response,
-                               final FilterChain chain)
-            throws IOException, ServletException {
-        HttpServletRequest req = (HttpServletRequest) request;
-        HttpSession session = req.getSession();
-        final String userName = (String) session.getAttribute("userName");
-        if (this.usersQueue.find(userName)) {
-            session.setAttribute("waitingFight", true);
-            final String requestURI = ((HttpServletRequest) request).getRequestURI();
-            if (requestURI.startsWith("/arena/duels")) {
-                chain.doFilter(request, response);
-            } else {
-                request.getRequestDispatcher("/arena/duels")
-                        .forward(request, response);
-            }
-        } else {
-            session.setAttribute("waitingFight", false);
-            chain.doFilter(request, response);
-        }
-    }
 
     @Override
     public final void init(final FilterConfig filterConfig) {
@@ -40,7 +20,26 @@ public class WaitingFightFilter implements Filter {
     }
 
     @Override
-    public final void destroy() {
-
+    public final void doFilter(final HttpServletRequest req,
+                               final HttpServletResponse res,
+                               final FilterChain chain)
+            throws IOException, ServletException {
+        HttpSession session = req.getSession();
+        final String userName = (String) session.getAttribute("userName");
+        final String requestURI = req.getRequestURI();
+        Optional<Object> optFighting = Optional.ofNullable(
+                req.getAttribute("fighting")
+        );
+        if (optFighting.isEmpty() && this.usersQueue.find(userName)) {
+            if (requestURI.equals("/arena/duels")) {
+                req.setAttribute("waitingFight", true);
+                chain.doFilter(req, res);
+            } else {
+                res.sendRedirect(req.getContextPath() + "/arena/duels");
+            }
+        } else {
+            req.setAttribute("waitingFight", false);
+            chain.doFilter(req, res);
+        }
     }
 }

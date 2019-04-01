@@ -16,8 +16,8 @@ public class SignIn extends HttpServlet {
     private UsersAuthentication authentication;
 
     @Override
-    protected void doGet(final HttpServletRequest req,
-                         final HttpServletResponse resp)
+    public final void doGet(final HttpServletRequest req,
+                            final HttpServletResponse resp)
             throws ServletException, IOException {
         this.getServletContext()
                 .getRequestDispatcher("/WEB-INF/views/Login.jsp")
@@ -25,25 +25,23 @@ public class SignIn extends HttpServlet {
     }
 
     @Override
-    protected void doPost(final HttpServletRequest req,
-                          final HttpServletResponse resp)
+    public final void doPost(final HttpServletRequest req,
+                             final HttpServletResponse resp)
             throws ServletException, IOException {
         final UnverifiedUser user = new UnverifiedUser(req);
         final Map<String, String> errors = this.authentication.authorize(user);
         if (errors.isEmpty()) {
             HttpSession session = req.getSession();
             session.setAttribute("userName", user.name());
-            req.getRequestDispatcher("/arena")
-                    .forward(req, resp);
+            resp.sendRedirect(req.getContextPath() + "/arena");
         } else {
             errors.forEach(req::setAttribute);
-            req.getRequestDispatcher("/WEB-INF/views/Login.jsp")
-                    .forward(req, resp);
+            this.doGet(req, resp);
         }
     }
 
     @Override
-    public void init() throws ServletException {
+    public final void init() throws ServletException {
         super.init();
         this.authentication = DependencyContainer.usersAuthentication();
     }

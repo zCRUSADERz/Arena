@@ -23,8 +23,7 @@ public class TechnicalInfo extends HttpServlet {
         final long finish = System.currentTimeMillis();
         final long requestTime = finish - start;
         req.setAttribute("requestTimer", requestTime);
-        this.getServletContext()
-                .getRequestDispatcher("/WEB-INF/views/FooterInfo.jsp")
+        req.getRequestDispatcher("/WEB-INF/views/FooterInfo.jsp")
                 .include(req, resp);
     }
 

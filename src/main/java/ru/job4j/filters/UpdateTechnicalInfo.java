@@ -19,17 +19,12 @@ public class UpdateTechnicalInfo implements Filter {
 
     @Override
     public final void doFilter(final ServletRequest request,
-                         final ServletResponse response,
-                         final FilterChain chain)
+                               final ServletResponse response,
+                               final FilterChain chain)
             throws IOException, ServletException {
         this.requestTimer.set(System.currentTimeMillis());
         this.queryCounter.set(0);
         this.queryTimer.set(0L);
         chain.doFilter(request, response);
-    }
-
-    @Override
-    public final void destroy() {
-
     }
 }
