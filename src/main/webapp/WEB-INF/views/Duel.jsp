@@ -8,9 +8,11 @@
     </c:if>
 </head>
 <body>
+<h4 align="center">Дуэль</h4>
 <c:if test="${not empty requestScope.timer}">
     <p align="center">До начала боя осталось ${requestScope.timer} секунд.</p>
-    <p align="center">Страница обновится автоматически.</p>
+    <p align="center">Страница обновится автоматически, по истечению таймера.</p>
 </c:if>
+<p align="center"><jsp:include page="/techInfo" /></p>
 </body>
 </html>

@@ -45,7 +45,7 @@ public class DependencyContainer {
                         defaultUserName
                 )
         ).start();
-        ACTIVE_DUELS = new ActiveDuels();
+        ACTIVE_DUELS = new ActiveDuels(DB_SOURCE);
     }
 
     public static ThreadLocal<Long> requestTimer() {

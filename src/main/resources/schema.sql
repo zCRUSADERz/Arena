@@ -13,6 +13,7 @@ CREATE TABLE users
 CREATE TABLE duels
 (
   id INT NOT NULL AUTO_INCREMENT,
+  created timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
 ) ENGINE = InnoDB
   DEFAULT CHARACTER SET = utf8;
@@ -50,3 +51,8 @@ SELECT name, 1 AS duel_id, health FROM users
 WHERE name = 'Alexander';
 
 DELETE FROM users_in_duels;
+
+SELECT d.created, CURRENT_TIMESTAMP() AS now
+FROM users_in_duels AS u
+  JOIN duels AS d
+    ON u.user_name = 'Alexander' AND u.duel_id = d.id;
