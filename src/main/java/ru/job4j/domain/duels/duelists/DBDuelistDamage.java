@@ -16,7 +16,7 @@ public class DBDuelistDamage {
 
     public final int damage() {
         final String query = ""
-                + "SELECT damage FROM users_in_duels "
+                + "SELECT damage FROM active_duelists "
                 + "WHERE user_name = ?";
         final int result;
         try (final PreparedStatement statement = this.connection.prepareStatement(query)) {

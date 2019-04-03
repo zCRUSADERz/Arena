@@ -17,9 +17,9 @@ public class AttackLogs {
 
     public final Collection<AttackLog> logs(final int duelId) {
         final String query = ""
-                + "SELECT l.attacker_name, l.target_name, ud.damage "
-                + "FROM attack_log AS l JOIN users_in_duels AS ud "
-                + "ON l.attacker_name = ud.user_name AND ud.duel_id = ? "
+                + "SELECT l.attacker_name, l.target_name, ad.damage "
+                + "FROM attack_log AS l JOIN active_duelists AS ad "
+                + "ON l.attacker_name = ad.user_name AND ad.duel_id = ? "
                 + "ORDER BY l.time";
         final Collection<AttackLog> result;
         try (PreparedStatement statement = this.connection.prepareStatement(query)) {
@@ -32,7 +32,7 @@ public class AttackLogs {
                                 new AttackLog(
                                         resultSet.getString("l.attacker_name"),
                                         resultSet.getString("l.target_name"),
-                                        resultSet.getInt("ud.damage")
+                                        resultSet.getInt("ad.damage")
                         ));
                     } while (resultSet.next());
                 } else {

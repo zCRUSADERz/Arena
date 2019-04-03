@@ -36,7 +36,7 @@ public class DBDuelist implements SimpleDuelist {
 
     public final void attack(final DBDuelist target) throws SQLException {
         final String attackQuery = ""
-                + "UPDATE users_in_duels  "
+                + "UPDATE active_duelists "
                 + "SET health = "
                 + "health - ? "
                 + "WHERE user_name = ?";

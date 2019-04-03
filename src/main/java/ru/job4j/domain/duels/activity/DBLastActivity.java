@@ -18,7 +18,7 @@ public class DBLastActivity implements Activity {
     public final long activity() {
         final long result;
         final String query = ""
-                + "SELECT last_activity FROM users_in_duels "
+                + "SELECT last_activity FROM active_duelists "
                 + "WHERE user_name = ?";
         try (final PreparedStatement statement = this.connection.prepareStatement(query)) {
             statement.setString(1, this.userName);
@@ -43,7 +43,7 @@ public class DBLastActivity implements Activity {
     @Override
     public final void update(final double delay) throws SQLException {
         final String query = ""
-                + "UPDATE users_in_duels "
+                + "UPDATE active_duelists "
                 + "SET last_activity = CURRENT_TIMESTAMP(3) + ? "
                 + "WHERE user_name = ?";
         try (final PreparedStatement statement = this.connection.prepareStatement(query)) {

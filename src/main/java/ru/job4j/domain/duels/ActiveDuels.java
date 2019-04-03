@@ -10,14 +10,14 @@ import java.sql.*;
 
 public class ActiveDuels {
     private final static String DUEL_SELECT = ""
-            + "SELECT ud1.user_name, ud1.last_activity, ud1.health, ud1.damage, "
-            + "d.id, d.created, CURRENT_TIMESTAMP() AS now, "
-            + "ud2.user_name, ud2.last_activity, ud2.health, ud2.damage "
-            + "FROM users_in_duels AS ud1 "
-            + "JOIN duels AS d "
-            + "ON ud1.duel_id = d.id AND ud1.user_name = ? "
-            + "JOIN users_in_duels AS ud2 "
-            + "ON ud2.duel_id = d.id AND ud2.user_name != ?";
+            + "SELECT ad1.user_name, ad1.last_activity, ad1.health, ad1.damage, "
+            + "d.duel_id, d.created, CURRENT_TIMESTAMP() AS now, "
+            + "ad2.user_name, ad2.last_activity, ad2.health, ad2.damage "
+            + "FROM active_duelists AS ad1 "
+            + "JOIN active_duels AS d "
+            + "ON ad1.duel_id = d.duel_id AND ad1.user_name = ? "
+            + "JOIN active_duelists AS ad2 "
+            + "ON ad2.duel_id = d.duel_id AND ad2.user_name != ?";
     private final DataSource dataSource;
     private final DuelistFactory duelistFactory;
     private final DuelFactory duelFactory;
@@ -41,22 +41,22 @@ public class ActiveDuels {
             statement.setString(2, userName);
             try (final ResultSet resultSet = statement.executeQuery()) {
                 if (resultSet.next()) {
-                    final int duelID = resultSet.getInt("d.id");
+                    final int duelID = resultSet.getInt("d.duel_id");
                     result = this.duelFactory.duel(
                             resultSet.getTimestamp("d.created"),
                             resultSet.getTimestamp("now"),
                             new PairOfDuelist<>(
                                     this.duelistFactory.duelist(
-                                            resultSet.getString("ud1.user_name"),
-                                            resultSet.getInt("ud1.damage"),
-                                            resultSet.getInt("ud1.health"),
-                                            resultSet.getTimestamp("ud1.last_activity")
+                                            resultSet.getString("ad1.user_name"),
+                                            resultSet.getInt("ad1.damage"),
+                                            resultSet.getInt("ad1.health"),
+                                            resultSet.getTimestamp("ad1.last_activity")
                                     ),
                                     this.duelistFactory.duelist(
-                                            resultSet.getString("ud2.user_name"),
-                                            resultSet.getInt("ud2.damage"),
-                                            resultSet.getInt("ud2.health"),
-                                            resultSet.getTimestamp("ud2.last_activity")
+                                            resultSet.getString("ad2.user_name"),
+                                            resultSet.getInt("ad2.damage"),
+                                            resultSet.getInt("ad2.health"),
+                                            resultSet.getTimestamp("ad2.last_activity")
                                     )
                             ),
                             this.logsFactory.logs(conn, duelID)
@@ -76,14 +76,14 @@ public class ActiveDuels {
 
     public final void turn(final String userName) {
         final String select = ""
-                + "SELECT ud1.user_name, ud1.last_activity, ud1.damage, "
-                + "d.id, d.created, CURRENT_TIMESTAMP() AS now, "
-                + "ud2.user_name, ud2.last_activity, ud2.damage "
-                + "FROM users_in_duels AS ud1 "
-                + "JOIN duels AS d "
-                + "ON ud1.duel_id = d.id AND ud1.user_name = ? "
-                + "JOIN users_in_duels AS ud2 "
-                + "ON ud2.duel_id = d.id AND ud2.user_name != ?";
+                + "SELECT ad1.user_name, ad1.last_activity, ad1.damage, "
+                + "d.duel_id, d.created, CURRENT_TIMESTAMP() AS now, "
+                + "ad2.user_name, ad2.last_activity, ad2.damage "
+                + "FROM active_duelists AS ad1 "
+                + "JOIN active_duels AS d "
+                + "ON ad1.duel_id = d.duel_id AND ad1.user_name = ? "
+                + "JOIN active_duelists AS ad2 "
+                + "ON ad2.duel_id = d.duel_id AND ad2.user_name != ?";
         try (final Connection conn = this.dataSource.getConnection()) {
             conn.setAutoCommit(false);
             final int defaultTransactionIsolation = conn.getTransactionIsolation();
@@ -97,22 +97,22 @@ public class ActiveDuels {
                         if (resultSet.next()) {
                             duel = this.duelFactory.duel(
                                     conn,
-                                    resultSet.getInt("d.id"),
+                                    resultSet.getInt("d.duel_id"),
                                     resultSet.getTimestamp("d.created"),
                                     resultSet.getTimestamp("now"),
                                     new PairOfDuelist<>(
                                             this.duelistFactory.duelist(
                                                     conn,
-                                                    resultSet.getString("ud1.user_name"),
-                                                    resultSet.getInt("ud1.damage"),
-                                                    resultSet.getTimestamp("ud1.last_activity"),
+                                                    resultSet.getString("ad1.user_name"),
+                                                    resultSet.getInt("ad1.damage"),
+                                                    resultSet.getTimestamp("ad1.last_activity"),
                                                     resultSet.getTimestamp("now")
                                             ),
                                             this.duelistFactory.duelist(
                                                     conn,
-                                                    resultSet.getString("ud2.user_name"),
-                                                    resultSet.getInt("ud2.damage"),
-                                                    resultSet.getTimestamp("ud2.last_activity"),
+                                                    resultSet.getString("ad2.user_name"),
+                                                    resultSet.getInt("ad2.damage"),
+                                                    resultSet.getTimestamp("ad2.last_activity"),
                                                     resultSet.getTimestamp("now")
                                             )
                                     )
@@ -140,7 +140,7 @@ public class ActiveDuels {
 
     public final boolean inDuel(final String userName) {
         final String query = ""
-                + "SELECT user_name FROM users_in_duels "
+                + "SELECT user_name FROM active_duelists "
                 + "WHERE user_name = ?";
         final boolean result;
         try (final Connection conn = this.dataSource.getConnection();
