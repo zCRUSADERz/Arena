@@ -10,7 +10,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
 
-public class Duels extends HttpServlet {
+public class DuelsPage extends HttpServlet {
     private UsersQueue queue;
 
     @Override
@@ -23,8 +23,7 @@ public class Duels extends HttpServlet {
 
     @Override
     public final void doPost(final HttpServletRequest req,
-                             final HttpServletResponse resp)
-            throws ServletException, IOException {
+                             final HttpServletResponse resp) throws IOException {
         HttpSession session = req.getSession();
         final String userName = (String) session.getAttribute("userName");
         final String action = req.getParameter("action");
@@ -36,15 +35,10 @@ public class Duels extends HttpServlet {
             } catch (InterruptedException ex) {
                 throw new IllegalStateException(ex);
             }
-            req.setAttribute("waitingFight", true);
-            this.doGet(req, resp);
         } else if ("cancel".equals(action) && waitingFight) {
             this.queue.remove(userName);
-            req.setAttribute("waitingFight", false);
-            this.doGet(req, resp);
-        } else {
-            doGet(req, resp);
         }
+        resp.sendRedirect(req.getContextPath() + "/arena/duels");
     }
 
     @Override

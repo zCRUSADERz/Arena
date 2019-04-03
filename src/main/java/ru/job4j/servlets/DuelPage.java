@@ -1,9 +1,9 @@
 package ru.job4j.servlets;
 
 import ru.job4j.DependencyContainer;
-import ru.job4j.domain.ActiveDuels;
-import ru.job4j.domain.Duel;
-import ru.job4j.domain.Duelist;
+import ru.job4j.domain.duels.ActiveDuels;
+import ru.job4j.domain.duels.Duel;
+import ru.job4j.domain.duels.duelists.Duelist;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -39,6 +39,16 @@ public class DuelPage extends HttpServlet {
         }
         req.getRequestDispatcher("/WEB-INF/views/Duel.jsp")
                 .forward(req, resp);
+    }
+
+    @Override
+     public final void doPost(final HttpServletRequest req,
+                              final HttpServletResponse resp)
+            throws IOException, ServletException {
+        HttpSession session = req.getSession();
+        final String userName = (String) session.getAttribute("userName");
+        this.activeDuels.turn(userName);
+        this.doGet(req, resp);
     }
 
     @Override

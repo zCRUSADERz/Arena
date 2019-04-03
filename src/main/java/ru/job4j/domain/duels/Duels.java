@@ -1,4 +1,4 @@
-package ru.job4j.domain;
+package ru.job4j.domain.duels;
 
 import javax.sql.DataSource;
 import java.sql.*;
@@ -36,10 +36,11 @@ public class Duels {
                 this.addDueler(second, duel_id, conn);
             } catch (final Exception ex) {
                 conn.rollback();
-                conn.setAutoCommit(true);
                 throw ex;
+            } finally {
+                conn.commit();
+                conn.setAutoCommit(true);
             }
-            conn.setAutoCommit(true);
         } catch (final SQLException ex) {
             throw new IllegalStateException(ex);
         }

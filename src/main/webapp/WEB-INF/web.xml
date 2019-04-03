@@ -40,7 +40,7 @@
 
     <servlet>
         <servlet-name>Duels</servlet-name>
-        <servlet-class>ru.job4j.servlets.Duels</servlet-class>
+        <servlet-class>ru.job4j.servlets.DuelsPage</servlet-class>
     </servlet>
     <servlet-mapping>
         <servlet-name>Duels</servlet-name>
@@ -97,7 +97,6 @@
     <filter-mapping>
         <filter-name>FightingFilter</filter-name>
         <url-pattern>/arena/*</url-pattern>
-        <url-pattern>/logOut</url-pattern>
         <dispatcher>REQUEST</dispatcher>
     </filter-mapping>
 
@@ -108,7 +107,6 @@
     <filter-mapping>
         <filter-name>WaitingFightFilter</filter-name>
         <url-pattern>/arena/*</url-pattern>
-        <url-pattern>/logOut</url-pattern>
         <dispatcher>REQUEST</dispatcher>
     </filter-mapping>
 </web-app>

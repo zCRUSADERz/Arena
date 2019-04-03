@@ -2,6 +2,7 @@ package ru.job4j.domain;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import ru.job4j.domain.duels.Duels;
 
 public class UsersQueueConsumer implements Runnable {
     private final UserNameHolder nameHolder;
@@ -40,6 +41,8 @@ public class UsersQueueConsumer implements Runnable {
                         try {
                             this.duels.create(first, second);
                         } catch (final RuntimeException exception) {
+                            //TODO Сделать возврат в очередь пользователей
+                            // не находящихся в дуэли.
                             this.logger.error(
                                     String.format(
                                             "Error while creating a duel for users: %s, %s",

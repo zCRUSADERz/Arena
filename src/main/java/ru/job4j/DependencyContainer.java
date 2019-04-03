@@ -6,6 +6,9 @@ import ru.job4j.db.DBConfig;
 import ru.job4j.db.DataSourceWrapper;
 import ru.job4j.db.StatementHandler;
 import ru.job4j.domain.*;
+import ru.job4j.domain.duels.*;
+import ru.job4j.domain.duels.factories.SimpleDuelFactory;
+import ru.job4j.domain.duels.factories.SimpleDuelistFactory;
 
 public class DependencyContainer {
     private final static HikariDataSource DB_SOURCE;
@@ -45,7 +48,11 @@ public class DependencyContainer {
                         defaultUserName
                 )
         ).start();
-        ACTIVE_DUELS = new ActiveDuels(DB_SOURCE);
+        ACTIVE_DUELS = new ActiveDuels(
+                DB_SOURCE,
+                new SimpleDuelistFactory(5000),
+                new SimpleDuelFactory(1)
+        );
     }
 
     public static ThreadLocal<Long> requestTimer() {

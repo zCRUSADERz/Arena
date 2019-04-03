@@ -1,7 +1,7 @@
 package ru.job4j.filters;
 
 import ru.job4j.DependencyContainer;
-import ru.job4j.domain.ActiveDuels;
+import ru.job4j.domain.duels.ActiveDuels;
 
 import javax.servlet.*;
 import javax.servlet.http.HttpFilter;
