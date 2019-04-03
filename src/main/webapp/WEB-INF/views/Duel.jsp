@@ -51,6 +51,9 @@
     </tr>
     </tbody>
 </table>
+<c:forEach var="log" items="${requestScope.logs}" >
+    <p align="center" ><c:out value="${log}" /></p>
+</c:forEach>
 <p align="center"><jsp:include page="/techInfo" /></p>
 </body>
 </html>

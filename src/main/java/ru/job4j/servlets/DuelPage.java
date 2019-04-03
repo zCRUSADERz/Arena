@@ -4,6 +4,7 @@ import ru.job4j.DependencyContainer;
 import ru.job4j.domain.duels.ActiveDuels;
 import ru.job4j.domain.duels.Duel;
 import ru.job4j.domain.duels.duelists.Duelist;
+import ru.job4j.domain.duels.logs.AttackLog;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -11,6 +12,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
+import java.util.Collection;
+import java.util.stream.Collectors;
 
 public class DuelPage extends HttpServlet {
     private ActiveDuels activeDuels;
@@ -34,6 +37,13 @@ public class DuelPage extends HttpServlet {
             if (user.canAttack(opponent)) {
                 req.setAttribute("canAttack", true);
             }
+            final Collection<AttackLog> logs = duel.logs();
+            final Collection<String> processedLog = logs
+                    .stream()
+                    .sequential()
+                    .map(attackLog -> attackLog.printFor(userName))
+                    .collect(Collectors.toList());
+            req.setAttribute("logs", processedLog);
         } else {
             req.setAttribute("timer", duel.timer());
         }

@@ -3,6 +3,7 @@ package ru.job4j.domain.duels;
 import ru.job4j.domain.duels.duelists.PairOfDuelist;
 import ru.job4j.domain.duels.factories.DuelFactory;
 import ru.job4j.domain.duels.factories.DuelistFactory;
+import ru.job4j.domain.duels.factories.LogsFactory;
 
 import javax.sql.DataSource;
 import java.sql.*;
@@ -20,13 +21,16 @@ public class ActiveDuels {
     private final DataSource dataSource;
     private final DuelistFactory duelistFactory;
     private final DuelFactory duelFactory;
+    private final LogsFactory logsFactory;
 
     public ActiveDuels(final DataSource dataSource,
                        final DuelistFactory duelistFactory,
-                       final DuelFactory duelFactory) {
+                       final DuelFactory duelFactory,
+                       final LogsFactory logsFactory) {
         this.dataSource = dataSource;
         this.duelistFactory = duelistFactory;
         this.duelFactory = duelFactory;
+        this.logsFactory = logsFactory;
     }
 
     public final Duel duel(final String userName) {
@@ -37,6 +41,7 @@ public class ActiveDuels {
             statement.setString(2, userName);
             try (final ResultSet resultSet = statement.executeQuery()) {
                 if (resultSet.next()) {
+                    final int duelID = resultSet.getInt("d.id");
                     result = this.duelFactory.duel(
                             resultSet.getTimestamp("d.created"),
                             resultSet.getTimestamp("now"),
@@ -53,7 +58,8 @@ public class ActiveDuels {
                                             resultSet.getInt("ud2.health"),
                                             resultSet.getTimestamp("ud2.last_activity")
                                     )
-                            )
+                            ),
+                            this.logsFactory.logs(conn, duelID)
                     );
                 } else {
                     throw new IllegalStateException(String.format(

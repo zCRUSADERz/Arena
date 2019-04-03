@@ -6,10 +6,12 @@ import ru.job4j.domain.duels.conditions.DuelStartCondition;
 import ru.job4j.domain.duels.duelists.DBDuelist;
 import ru.job4j.domain.duels.duelists.Duelist;
 import ru.job4j.domain.duels.duelists.PairOfDuelist;
+import ru.job4j.domain.duels.logs.AttackLog;
 import ru.job4j.domain.duels.logs.AttackLogs;
 
 import java.sql.Connection;
 import java.sql.Timestamp;
+import java.util.Collection;
 
 public class SimpleDuelFactory implements DuelFactory {
     /**
@@ -23,12 +25,14 @@ public class SimpleDuelFactory implements DuelFactory {
 
     @Override
     public final Duel duel(final Timestamp created, final Timestamp now,
-                           final PairOfDuelist<Duelist> duelists) {
+                           final PairOfDuelist<Duelist> duelists,
+                           final Collection<AttackLog> logs) {
         return new Duel(
                 new DuelStartCondition(
                         created, now, this.duelStartDelay
                 ),
-                duelists
+                duelists,
+                logs
         );
     }
 
