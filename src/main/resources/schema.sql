@@ -49,6 +49,7 @@ CREATE TABLE attack_log
   PRIMARY KEY (attacker_name, time),
   KEY duel_idx (duel_id),
   KEY target_idx (target_name),
+  KEY time_idx (time) USING BTREE,
   CONSTRAINT attacker_attack_log_fk
     FOREIGN KEY (attacker_name)
       REFERENCES users_in_duels (user_name)
