@@ -1,4 +1,4 @@
-package ru.job4j.domain;
+package ru.job4j.domain.queue;
 
 import java.util.concurrent.atomic.AtomicReference;
 

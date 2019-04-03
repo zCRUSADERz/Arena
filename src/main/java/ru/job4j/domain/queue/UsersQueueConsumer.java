@@ -1,4 +1,4 @@
-package ru.job4j.domain;
+package ru.job4j.domain.queue;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

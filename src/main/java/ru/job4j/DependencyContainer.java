@@ -9,6 +9,8 @@ import ru.job4j.domain.*;
 import ru.job4j.domain.duels.*;
 import ru.job4j.domain.duels.factories.SimpleDuelFactory;
 import ru.job4j.domain.duels.factories.SimpleDuelistFactory;
+import ru.job4j.domain.queue.UsersQueue;
+import ru.job4j.domain.queue.UsersQueueConsumer;
 
 public class DependencyContainer {
     private final static HikariDataSource DB_SOURCE;

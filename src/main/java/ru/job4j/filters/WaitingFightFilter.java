@@ -1,7 +1,7 @@
 package ru.job4j.filters;
 
 import ru.job4j.DependencyContainer;
-import ru.job4j.domain.UsersQueue;
+import ru.job4j.domain.queue.UsersQueue;
 
 import javax.servlet.*;
 import javax.servlet.http.HttpFilter;
