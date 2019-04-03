@@ -42,16 +42,20 @@ CREATE TABLE `attack_log`
   `target_name`   varchar(25)  NOT NULL,
   PRIMARY KEY (`attacker_name`, `time`),
   KEY `duel_idx` (`duel_id`),
-  KEY `target_idx` (`target_name`),
   KEY `time_idx` (`time`) USING BTREE,
+  KEY `attack_log_attacker_name_fk_idx` (`attacker_name`),
+  KEY `attack_log_target_name_fk_idx` (`target_name`),
   CONSTRAINT `attack_log_attacker_name_fk`
-    FOREIGN KEY (`attacker_name`) REFERENCES `active_duelists` (`user_name`)
+    FOREIGN KEY (`attacker_name`)
+      REFERENCES `users` (`name`)
       ON DELETE CASCADE ON UPDATE RESTRICT,
   CONSTRAINT `attack_log_duel_id_fk`
-    FOREIGN KEY (`duel_id`) REFERENCES `active_duels` (`duel_id`)
+    FOREIGN KEY (`duel_id`)
+      REFERENCES `active_duels` (`duel_id`)
       ON DELETE CASCADE ON UPDATE RESTRICT,
   CONSTRAINT `attack_log_target_name_fk`
-    FOREIGN KEY (`target_name`) REFERENCES `active_duelists` (`user_name`)
+    FOREIGN KEY (`target_name`)
+      REFERENCES `users` (`name`)
       ON DELETE CASCADE ON UPDATE RESTRICT
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8;
@@ -71,7 +75,7 @@ CREATE TABLE `duelists_history`
   `duel_id`   int(11)     NOT NULL,
   `health`    int(11)     NOT NULL,
   `damage`    int(11)     NOT NULL,
-  PRIMARY KEY (`user_name`),
+  PRIMARY KEY (`user_name`, duel_id),
   KEY `duel_idx` (`duel_id`),
   CONSTRAINT `duelists_history_duel_id_fk`
     FOREIGN KEY (`duel_id`) REFERENCES `duels_history` (`duel_id`)
@@ -85,21 +89,65 @@ CREATE TABLE `duelists_history`
 CREATE TABLE `attack_log_history`
 (
   `attacker_name` varchar(25)  NOT NULL,
-  `time`          timestamp(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  `time`          timestamp(3) NOT NULL,
   `duel_id`       int(11)      NOT NULL,
   `target_name`   varchar(25)  NOT NULL,
   PRIMARY KEY (`attacker_name`, `time`),
   KEY `duel_idx` (`duel_id`),
-  KEY `target_idx` (`target_name`),
   KEY `time_idx` (`time`) USING BTREE,
+  KEY `attack_log_history_attacker_name_fk_idx` (`attacker_name`),
+  KEY `attack_log_history_target_name_fk_idx` (`target_name`),
   CONSTRAINT `attack_log_history_attacker_name_fk`
-    FOREIGN KEY (`attacker_name`) REFERENCES `duelists_history` (`user_name`)
+    FOREIGN KEY (`attacker_name`) REFERENCES `users` (`name`)
       ON DELETE CASCADE ON UPDATE RESTRICT,
   CONSTRAINT `attack_log_history_duel_id_fk`
     FOREIGN KEY (`duel_id`) REFERENCES `duels_history` (`duel_id`)
       ON DELETE CASCADE ON UPDATE RESTRICT,
   CONSTRAINT `attack_log_history_target_name_fk`
-    FOREIGN KEY (`target_name`) REFERENCES `duelists_history` (`user_name`)
+    FOREIGN KEY (`target_name`) REFERENCES `users` (`name`)
       ON DELETE CASCADE ON UPDATE RESTRICT
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8;
+
+CREATE TABLE `final_blow`
+(
+  `attacker_name` varchar(25) NOT NULL,
+  `duel_id`       int(11)     NOT NULL,
+  `target_name`   varchar(25) NOT NULL,
+  PRIMARY KEY (`duel_id`),
+  KEY `duel_idx` (`duel_id`),
+  KEY `final_blow_attacker_fk` (`attacker_name`),
+  KEY `final_blow2_target_fk` (`target_name`),
+  CONSTRAINT `final_blow2_target_fk`
+    FOREIGN KEY (`target_name`)
+      REFERENCES `users` (`name`)
+      ON DELETE CASCADE ON UPDATE RESTRICT,
+  CONSTRAINT `final_blow_attacker_fk`
+    FOREIGN KEY (`attacker_name`)
+      REFERENCES `users` (`name`)
+      ON DELETE CASCADE ON UPDATE RESTRICT,
+  CONSTRAINT `final_blow_duel_id_fk`
+    FOREIGN KEY (`duel_id`)
+      REFERENCES `duels_history` (`duel_id`)
+      ON DELETE CASCADE ON UPDATE RESTRICT
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8;
+
+INSERT INTO duels_history (duel_id, created)
+SELECT duel_id, created
+FROM active_duels
+WHERE duel_id = 4;
+
+INSERT INTO duelists_history (user_name, duel_id, health, damage)
+SELECT user_name, duel_id, health, damage
+FROM active_duelists
+WHERE duel_id = 4;
+
+INSERT INTO attack_log_history (attacker_name, time, duel_id, target_name)
+SELECT attacker_name, time, duel_id, target_name
+FROM attack_log
+WHERE duel_id = 4;
+
+DELETE FROM active_duels WHERE duel_id = 4;
+DELETE FROM active_duelists WHERE duel_id = 4;
+DELETE FROM attack_log WHERE duel_id = 4;
