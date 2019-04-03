@@ -39,3 +39,27 @@ CREATE TABLE users_in_duels
       ON UPDATE RESTRICT
 ) ENGINE = InnoDB
   DEFAULT CHARACTER SET = utf8;
+
+CREATE TABLE `attack_log`
+(
+  attacker_name varchar(25)  NOT NULL,
+  time          timestamp(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  duel_id       int(11)      NOT NULL,
+  target_name   varchar(25)  NOT NULL,
+  PRIMARY KEY (attacker_name, time),
+  KEY duel_idx (duel_id),
+  KEY target_idx (target_name),
+  CONSTRAINT attacker_attack_log_fk
+    FOREIGN KEY (attacker_name)
+      REFERENCES users_in_duels (user_name)
+      ON DELETE CASCADE ON UPDATE RESTRICT,
+  CONSTRAINT duel_attack_log_fk
+    FOREIGN KEY (duel_id)
+      REFERENCES duels (id)
+      ON DELETE CASCADE ON UPDATE RESTRICT,
+  CONSTRAINT target_attack_log_fk
+    FOREIGN KEY (target_name)
+      REFERENCES users_in_duels (user_name)
+      ON DELETE CASCADE ON UPDATE RESTRICT
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8
