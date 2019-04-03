@@ -151,3 +151,6 @@ WHERE duel_id = 4;
 DELETE FROM active_duels WHERE duel_id = 4;
 DELETE FROM active_duelists WHERE duel_id = 4;
 DELETE FROM attack_log WHERE duel_id = 4;
+
+INSERT INTO final_blow (attacker_name, duel_id, target_name)
+VALUE ('Alexander', 1, 'Alexander2');

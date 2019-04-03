@@ -10,16 +10,18 @@ import java.sql.SQLException;
 public class DBDuelist implements SimpleDuelist {
     private final String userName;
     private final int damage;
+    private final int health;
     private final Activity lastActivity;
     private final AttackCondition attackCondition;
     private final Connection connection;
 
-    public DBDuelist(final String userName, final int damage,
+    public DBDuelist(final String userName, final int damage, final int health,
                      final Activity lastActivity,
                      final AttackCondition attackCondition,
                      final Connection connection) {
         this.userName = userName;
         this.damage = damage;
+        this.health = health;
         this.lastActivity = lastActivity;
         this.attackCondition = attackCondition;
         this.connection = connection;
@@ -34,12 +36,7 @@ public class DBDuelist implements SimpleDuelist {
         return this.damage;
     }
 
-    public final void attack(final DBDuelist target) throws SQLException {
-        final String attackQuery = ""
-                + "UPDATE active_duelists "
-                + "SET health = "
-                + "health - ? "
-                + "WHERE user_name = ?";
+    public final AttackResult attack(final DBDuelist target) throws SQLException {
         if (!this.attackCondition
                 .canAttack(this.lastActivity, target.lastActivity)) {
             throw new IllegalStateException(String.format(
@@ -53,9 +50,23 @@ public class DBDuelist implements SimpleDuelist {
           in order to provide the subsequent move to the attacked.
          */
         this.lastActivity.update(0.01);
+        final int newTargetHealth;
+        final AttackResult result;
+        final int resultHealth = target.health - this.damage;
+        if (resultHealth < 0) {
+            newTargetHealth = 0;
+            result = new AttackResult(true, target.health);
+        } else {
+            newTargetHealth = resultHealth;
+            result = new AttackResult(false, this.damage);
+        }
+        final String attackQuery = ""
+                + "UPDATE active_duelists "
+                + "SET health = ? "
+                + "WHERE user_name = ?";
         try (final PreparedStatement statement
                      = this.connection.prepareStatement(attackQuery)) {
-            statement.setInt(1, this.damage());
+            statement.setInt(1, newTargetHealth);
             statement.setString(2, target.userName);
             if (statement.executeUpdate() != 1) {
                 throw new IllegalStateException(String.format(
@@ -64,5 +75,6 @@ public class DBDuelist implements SimpleDuelist {
                 ));
             }
         }
+        return result;
     }
 }

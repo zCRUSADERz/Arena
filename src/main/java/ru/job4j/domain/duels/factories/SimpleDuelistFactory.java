@@ -35,11 +35,13 @@ public class SimpleDuelistFactory implements DuelistFactory {
 
     @Override
     public final DBDuelist duelist(final Connection conn, final String userName,
-                                   final int damage, final Timestamp lastActivity,
+                                   final int damage, final int health,
+                                   final Timestamp lastActivity,
                                    final Timestamp now) {
         return new DBDuelist(
                 userName,
                 damage,
+                health,
                 new LastActivityWrapper(
                         new ConstantLastActivity(lastActivity),
                         new DBLastActivity(userName, conn)

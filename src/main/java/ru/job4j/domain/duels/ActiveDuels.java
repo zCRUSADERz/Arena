@@ -75,22 +75,13 @@ public class ActiveDuels {
     }
 
     public final void turn(final String userName) {
-        final String select = ""
-                + "SELECT ad1.user_name, ad1.last_activity, ad1.damage, "
-                + "d.duel_id, d.created, CURRENT_TIMESTAMP() AS now, "
-                + "ad2.user_name, ad2.last_activity, ad2.damage "
-                + "FROM active_duelists AS ad1 "
-                + "JOIN active_duels AS d "
-                + "ON ad1.duel_id = d.duel_id AND ad1.user_name = ? "
-                + "JOIN active_duelists AS ad2 "
-                + "ON ad2.duel_id = d.duel_id AND ad2.user_name != ?";
         try (final Connection conn = this.dataSource.getConnection()) {
             conn.setAutoCommit(false);
             final int defaultTransactionIsolation = conn.getTransactionIsolation();
             conn.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
             try {
                 final DBDuel duel;
-                try (final PreparedStatement statement = conn.prepareStatement(select)) {
+                try (final PreparedStatement statement = conn.prepareStatement(DUEL_SELECT)) {
                     statement.setString(1, userName);
                     statement.setString(2, userName);
                     try (final ResultSet resultSet = statement.executeQuery()) {
@@ -105,6 +96,7 @@ public class ActiveDuels {
                                                     conn,
                                                     resultSet.getString("ad1.user_name"),
                                                     resultSet.getInt("ad1.damage"),
+                                                    resultSet.getInt("ad1.health"),
                                                     resultSet.getTimestamp("ad1.last_activity"),
                                                     resultSet.getTimestamp("now")
                                             ),
@@ -112,6 +104,7 @@ public class ActiveDuels {
                                                     conn,
                                                     resultSet.getString("ad2.user_name"),
                                                     resultSet.getInt("ad2.damage"),
+                                                    resultSet.getInt("ad2.health"),
                                                     resultSet.getTimestamp("ad2.last_activity"),
                                                     resultSet.getTimestamp("now")
                                             )

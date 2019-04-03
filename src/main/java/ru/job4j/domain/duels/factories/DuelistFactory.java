@@ -12,6 +12,6 @@ public interface DuelistFactory {
                     final int health, final Timestamp lastActivity);
 
     DBDuelist duelist(final Connection conn, final String userName,
-                      final int damage, final Timestamp lastActivity,
-                      final Timestamp now);
+                      final int damage, final int health,
+                      final Timestamp lastActivity, final Timestamp now);
 }
