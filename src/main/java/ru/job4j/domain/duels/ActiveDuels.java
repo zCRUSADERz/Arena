@@ -70,9 +70,9 @@ public class ActiveDuels {
 
     public final void turn(final String userName) {
         final String select = ""
-                + "SELECT ud1.user_name, ud1.last_activity, "
+                + "SELECT ud1.user_name, ud1.last_activity, ud1.damage, "
                 + "d.id, d.created, CURRENT_TIMESTAMP() AS now, "
-                + "ud2.user_name, ud2.last_activity "
+                + "ud2.user_name, ud2.last_activity, ud2.damage "
                 + "FROM users_in_duels AS ud1 "
                 + "JOIN duels AS d "
                 + "ON ud1.duel_id = d.id AND ud1.user_name = ? "
@@ -90,6 +90,7 @@ public class ActiveDuels {
                     try (final ResultSet resultSet = statement.executeQuery()) {
                         if (resultSet.next()) {
                             duel = this.duelFactory.duel(
+                                    conn,
                                     resultSet.getInt("d.id"),
                                     resultSet.getTimestamp("d.created"),
                                     resultSet.getTimestamp("now"),
@@ -97,12 +98,14 @@ public class ActiveDuels {
                                             this.duelistFactory.duelist(
                                                     conn,
                                                     resultSet.getString("ud1.user_name"),
+                                                    resultSet.getInt("ud1.damage"),
                                                     resultSet.getTimestamp("ud1.last_activity"),
                                                     resultSet.getTimestamp("now")
                                             ),
                                             this.duelistFactory.duelist(
                                                     conn,
                                                     resultSet.getString("ud2.user_name"),
+                                                    resultSet.getInt("ud2.damage"),
                                                     resultSet.getTimestamp("ud2.last_activity"),
                                                     resultSet.getTimestamp("now")
                                             )

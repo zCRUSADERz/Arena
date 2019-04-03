@@ -5,19 +5,21 @@ import ru.job4j.domain.duels.conditions.AttackCondition;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 
 public class DBDuelist implements SimpleDuelist {
     private final String userName;
+    private final int damage;
     private final Activity lastActivity;
     private final AttackCondition attackCondition;
     private final Connection connection;
 
-    public DBDuelist(final String userName, final Activity lastActivity,
+    public DBDuelist(final String userName, final int damage,
+                     final Activity lastActivity,
                      final AttackCondition attackCondition,
                      final Connection connection) {
         this.userName = userName;
+        this.damage = damage;
         this.lastActivity = lastActivity;
         this.attackCondition = attackCondition;
         this.connection = connection;
@@ -29,26 +31,7 @@ public class DBDuelist implements SimpleDuelist {
     }
 
     public final int damage() {
-        final String query = ""
-                + "SELECT damage FROM users_in_duels "
-                + "WHERE user_name = ?";
-        final int result;
-        try (final PreparedStatement statement = this.connection.prepareStatement(query)) {
-            statement.setString(1, this.userName);
-            try (final ResultSet resultSet = statement.executeQuery()) {
-                if (resultSet.next()) {
-                    result = resultSet.getInt("damage");
-                } else {
-                    throw new IllegalStateException(String.format(
-                            "User: %s not exist in active duels.",
-                            this.userName
-                    ));
-                }
-            }
-        } catch (final SQLException ex) {
-            throw new IllegalStateException(ex);
-        }
-        return result;
+        return this.damage;
     }
 
     public final void attack(final DBDuelist target) throws SQLException {
@@ -70,10 +53,9 @@ public class DBDuelist implements SimpleDuelist {
           in order to provide the subsequent move to the attacked.
          */
         this.lastActivity.update(0.01);
-        final int userDamage = this.damage();
         try (final PreparedStatement statement
                      = this.connection.prepareStatement(attackQuery)) {
-            statement.setInt(1, userDamage);
+            statement.setInt(1, this.damage());
             statement.setString(2, target.userName);
             if (statement.executeUpdate() != 1) {
                 throw new IllegalStateException(String.format(
