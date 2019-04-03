@@ -12,7 +12,7 @@ CREATE TABLE users
 
 CREATE TABLE duels
 (
-  id INT NOT NULL AUTO_INCREMENT,
+  id      INT       NOT NULL AUTO_INCREMENT,
   created timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
 ) ENGINE = InnoDB
@@ -24,6 +24,7 @@ CREATE TABLE users_in_duels
   duel_id       INT          NOT NULL,
   last_activity timestamp(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
   health        int(11)      NOT NULL,
+  damage        int(11)      NOT NULL,
   PRIMARY KEY (user_name),
   KEY duel_idx (duel_id),
   CONSTRAINT duel

@@ -5,6 +5,7 @@ import ru.job4j.domain.duels.conditions.AttackCondition;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 
 public class DBDuelist implements SimpleDuelist {
@@ -23,14 +24,38 @@ public class DBDuelist implements SimpleDuelist {
     }
 
     @Override
-    public String name() {
+    public final String name() {
         return this.userName;
+    }
+
+    public final int damage() {
+        final String query = ""
+                + "SELECT damage FROM users_in_duels "
+                + "WHERE user_name = ?";
+        final int result;
+        try (final PreparedStatement statement = this.connection.prepareStatement(query)) {
+            statement.setString(1, this.userName);
+            try (final ResultSet resultSet = statement.executeQuery()) {
+                if (resultSet.next()) {
+                    result = resultSet.getInt("damage");
+                } else {
+                    throw new IllegalStateException(String.format(
+                            "User: %s not exist in active duels.",
+                            this.userName
+                    ));
+                }
+            }
+        } catch (final SQLException ex) {
+            throw new IllegalStateException(ex);
+        }
+        return result;
     }
 
     public final void attack(final DBDuelist target) throws SQLException {
         final String attackQuery = ""
                 + "UPDATE users_in_duels  "
-                + "SET health = health - (SELECT damage FROM users WHERE name = ?) "
+                + "SET health = "
+                + "health - ? "
                 + "WHERE user_name = ?";
         if (!this.attackCondition
                 .canAttack(this.lastActivity, target.lastActivity)) {
@@ -45,9 +70,10 @@ public class DBDuelist implements SimpleDuelist {
           in order to provide the subsequent move to the attacked.
          */
         this.lastActivity.update(0.01);
+        final int userDamage = this.damage();
         try (final PreparedStatement statement
                      = this.connection.prepareStatement(attackQuery)) {
-            statement.setString(1, this.userName);
+            statement.setInt(1, userDamage);
             statement.setString(2, target.userName);
             if (statement.executeUpdate() != 1) {
                 throw new IllegalStateException(String.format(

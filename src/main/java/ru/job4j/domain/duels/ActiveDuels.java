@@ -9,18 +9,14 @@ import java.sql.*;
 
 public class ActiveDuels {
     private final static String DUEL_SELECT = ""
-            + "SELECT ud1.user_name, ud1.last_activity, ud1.health, us1.damage, "
+            + "SELECT ud1.user_name, ud1.last_activity, ud1.health, ud1.damage, "
             + "d.id, d.created, CURRENT_TIMESTAMP() AS now, "
-            + "ud2.user_name, ud2.last_activity, ud2.health, us2.damage "
+            + "ud2.user_name, ud2.last_activity, ud2.health, ud2.damage "
             + "FROM users_in_duels AS ud1 "
-            + "JOIN users AS us1 "
-            + "ON ud1.user_name = us1.name AND us1.name = ? "
             + "JOIN duels AS d "
-            + "ON ud1.duel_id = d.id "
+            + "ON ud1.duel_id = d.id AND ud1.user_name = ? "
             + "JOIN users_in_duels AS ud2 "
-            + "ON ud2.duel_id = d.id AND ud2.user_name != ? "
-            + "JOIN users AS us2 "
-            + "ON ud2.user_name = us2.name";
+            + "ON ud2.duel_id = d.id AND ud2.user_name != ?";
     private final DataSource dataSource;
     private final DuelistFactory duelistFactory;
     private final DuelFactory duelFactory;
@@ -47,13 +43,13 @@ public class ActiveDuels {
                             new PairOfDuelist<>(
                                     this.duelistFactory.duelist(
                                             resultSet.getString("ud1.user_name"),
-                                            resultSet.getInt("us1.damage"),
+                                            resultSet.getInt("ud1.damage"),
                                             resultSet.getInt("ud1.health"),
                                             resultSet.getTimestamp("ud1.last_activity")
                                     ),
                                     this.duelistFactory.duelist(
                                             resultSet.getString("ud2.user_name"),
-                                            resultSet.getInt("us2.damage"),
+                                            resultSet.getInt("ud2.damage"),
                                             resultSet.getInt("ud2.health"),
                                             resultSet.getTimestamp("ud2.last_activity")
                                     )
