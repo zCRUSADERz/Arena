@@ -4,6 +4,7 @@ CREATE TABLE `users`
   `password` varchar(30) NOT NULL,
   `health`   int(11)     NOT NULL DEFAULT '100',
   `damage`   int(11)     NOT NULL DEFAULT '10',
+  `rating` int(11) NOT NULL DEFAULT '0',
   PRIMARY KEY (`name`)
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8;

@@ -74,8 +74,7 @@ public class Duels {
                             .apply(conn)
                             .create(result);
                     final Users users = this.usersFactory.apply(conn);
-                    users.upgrade(result.attacker());
-                    users.upgrade(result.target());
+                    users.upgrade(result);
                 }
             } catch (final Exception ex) {
             conn.rollback();
