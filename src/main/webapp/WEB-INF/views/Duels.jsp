@@ -1,3 +1,4 @@
+<%@ page import="ru.job4j.domain.rating.UserRating" %>
 <%@ page contentType="text/html;charset=UTF-8" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <html>
@@ -6,6 +7,9 @@
     <c:if test="${requestScope.waitingFight}">
         <meta http-equiv="refresh" content="10">
     </c:if>
+    <style type="text/css">
+        form { text-align: center}
+    </style>
 </head>
 <body>
 <c:choose>
@@ -20,9 +24,23 @@
         </form>
     </c:when>
     <c:otherwise>
+        <table align="center">
+            <tr>
+                <td>Рейтинг</td>
+                <td><%= ((UserRating) request.getAttribute("rating")).rating() %></td>
+            </tr>
+            <tr>
+                <td>Побед</td>
+                <td><%= ((UserRating) request.getAttribute("rating")).victories() %></td>
+            </tr>
+            <tr>
+                <td>Поражений</td>
+                <td><%= ((UserRating) request.getAttribute("rating")).defeat() %></td>
+            </tr>
+        </table>
         <form action="${requestScope.contextPath}/arena/duels" method="post">
-            <input type="hidden" name="action" value="start" align="center">
-            <input type="submit" value="Начать" align="center">
+            <input type="hidden" name="action" value="start">
+            <input type="submit" value="Начать">
         </form>
         <p align="center"><a href="${requestScope.contextPath}/arena">Главное меню</a></p>
     </c:otherwise>

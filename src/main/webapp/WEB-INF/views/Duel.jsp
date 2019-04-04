@@ -6,6 +6,9 @@
     <c:if test="${not empty requestScope.timer}">
         <meta http-equiv="refresh" content="${requestScope.timer}">
     </c:if>
+    <style type="text/css">
+        form { text-align: center}
+    </style>
 </head>
 <body>
 <h4 align="center">Дуэль</h4>

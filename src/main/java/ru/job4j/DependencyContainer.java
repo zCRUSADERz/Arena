@@ -14,6 +14,7 @@ import ru.job4j.domain.duels.logs.AttackLogs;
 import ru.job4j.domain.duels.logs.FinalBlows;
 import ru.job4j.domain.queue.UsersQueue;
 import ru.job4j.domain.queue.UsersQueueConsumer;
+import ru.job4j.domain.rating.UsersRating;
 
 import java.util.function.Supplier;
 
@@ -26,6 +27,7 @@ public class DependencyContainer {
     private final static UsersQueue USERS_QUEUE;
     private final static Duels DUELS;
     private final static Supplier<ActiveDuels> ACTIVE_DUELS;
+    private final static Supplier<UsersRating> USERS_RATING;
 
     static {
         QUERY_COUNTER = ThreadLocal.withInitial(() -> 0);
@@ -76,6 +78,9 @@ public class DependencyContainer {
                 (connectionInner, duelID) ->
                         new AttackLogs(connectionInner).logs(duelID)
         );
+        USERS_RATING = () -> new UsersRating(
+                new ConstantConnectionFactory(DB_SOURCE)
+        );
     }
 
     public static ThreadLocal<Long> requestTimer() {
@@ -104,5 +109,9 @@ public class DependencyContainer {
 
     public static Duels duels() {
         return DUELS;
+    }
+
+    public static Supplier<UsersRating> usersRating() {
+        return USERS_RATING;
     }
 }
