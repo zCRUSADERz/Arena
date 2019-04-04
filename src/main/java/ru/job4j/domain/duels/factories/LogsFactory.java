@@ -7,6 +7,5 @@ import java.util.Collection;
 
 public interface LogsFactory {
 
-    Collection<AttackLog> logs(final Connection connection,
-                                            final int duelID);
+    Collection<AttackLog> logs(final int duelID);
 }

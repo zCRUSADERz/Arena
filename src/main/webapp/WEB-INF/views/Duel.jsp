@@ -1,3 +1,4 @@
+<%@ page import="ru.job4j.domain.duels.duelists.Duelist" %>
 <%@ page contentType="text/html;charset=UTF-8"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <html>
@@ -20,23 +21,23 @@
     <thead>
     <tr>
         <th>Вы</th>
-        <th>${requestScope.yourName}</th>
+        <th><%= ((Duelist) request.getAttribute("user")).name() %></th>
         <th>Противник</th>
-        <th>${requestScope.opponentName}</th>
+        <th><%= ((Duelist) request.getAttribute("opponent")).name() %></th>
     </tr>
     </thead>
     <tbody>
     <tr>
         <td>Урон:</td>
-        <td>${requestScope.yourDamage}</td>
+        <td><%= ((Duelist) request.getAttribute("user")).damage() %></td>
         <td>Урон:</td>
-        <td>${requestScope.opponentDamage}</td>
+        <td><%= ((Duelist) request.getAttribute("opponent")).damage() %></td>
     </tr>
     <tr>
         <td>Жизни:</td>
-        <td>${requestScope.yourHealth}</td>
+        <td><%= ((Duelist) request.getAttribute("user")).health() %></td>
         <td>Жизни:</td>
-        <td>${requestScope.opponentHealth}</td>
+        <td><%= ((Duelist) request.getAttribute("opponent")).health() %></td>
     </tr>
     <tr>
         <td>

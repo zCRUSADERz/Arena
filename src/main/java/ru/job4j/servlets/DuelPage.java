@@ -31,13 +31,9 @@ public class DuelPage extends HttpServlet {
         try (final ActiveDuels activeDuels = this.activeDuelsFactory.get()) {
             final Duel duel = activeDuels.duel(userName);
             final Duelist user = duel.duelist(userName);
-            req.setAttribute("yourName", user.name());
-            req.setAttribute("yourDamage", user.damage());
-            req.setAttribute("yourHealth", user.health());
+            req.setAttribute("user", user);
             final Duelist opponent = duel.opponent(userName);
-            req.setAttribute("opponentName", opponent.name());
-            req.setAttribute("opponentDamage", opponent.damage());
-            req.setAttribute("opponentHealth", opponent.health());
+            req.setAttribute("opponent", opponent);
             if (duel.started()) {
                 if (user.canAttack(opponent)) {
                     req.setAttribute("canAttack", true);
@@ -67,17 +63,16 @@ public class DuelPage extends HttpServlet {
         final String userName = (String) session.getAttribute("userName");
         final DuelAttackResult result = this.duels.turn(userName);
         if (result.killed()) {
-            //TODO duel history page.
-            resp.sendRedirect(req.getContextPath() + "/arena");
+            resp.sendRedirect(req.getContextPath() + "/arena/duel/history");
         } else {
-            this.doGet(req, resp);
+        this.doGet(req, resp);
         }
-    }
+        }
 
-    @Override
-    public final void init() throws ServletException {
+@Override
+public final void init() throws ServletException {
         super.init();
         this.activeDuelsFactory = DependencyContainer.activeDuels();
         this.duels = DependencyContainer.duels();
-    }
-}
+        }
+        }

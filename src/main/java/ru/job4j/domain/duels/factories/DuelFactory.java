@@ -17,7 +17,6 @@ public interface DuelFactory {
               final PairOfDuelist<Duelist> duelists,
               final Collection<AttackLog> logs);
 
-    DBDuel duel(final Connection connection, final int duelId,
-                final Timestamp created, final Timestamp now,
+    DBDuel duel(final int duelId, final Timestamp created, final Timestamp now,
                 final PairOfDuelist<DBDuelist> duelists);
 }

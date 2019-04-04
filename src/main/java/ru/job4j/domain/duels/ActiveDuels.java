@@ -35,9 +35,11 @@ public class ActiveDuels implements AutoCloseable {
         this.logsFactory = logsFactory;
     }
 
+
     public final Duel duel(final String userName) {
         final Duel result;
-        try (final PreparedStatement statement = this.connectionFactory.get().prepareStatement(DUEL_SELECT)) {
+        try (final PreparedStatement statement
+                     = this.connectionFactory.get().prepareStatement(DUEL_SELECT)) {
             statement.setString(1, userName);
             statement.setString(2, userName);
             try (final ResultSet resultSet = statement.executeQuery()) {
@@ -60,7 +62,7 @@ public class ActiveDuels implements AutoCloseable {
                                             resultSet.getTimestamp("ad2.last_activity")
                                     )
                             ),
-                            this.logsFactory.logs(this.connectionFactory.get(), duelID)
+                            this.logsFactory.logs(duelID)
                     );
                 } else {
                     throw new IllegalStateException(String.format(
@@ -77,19 +79,18 @@ public class ActiveDuels implements AutoCloseable {
 
     public final DuelAttackResult turn(final String userName) {
         final DBDuel duel;
-        try (final PreparedStatement statement = this.connectionFactory.get().prepareStatement(DUEL_SELECT)) {
+        try (final PreparedStatement statement
+                     = this.connectionFactory.get().prepareStatement(DUEL_SELECT)) {
             statement.setString(1, userName);
             statement.setString(2, userName);
             try (final ResultSet resultSet = statement.executeQuery()) {
                 if (resultSet.next()) {
                     duel = this.duelFactory.duel(
-                            this.connectionFactory.get(),
                             resultSet.getInt("d.duel_id"),
                             resultSet.getTimestamp("d.created"),
                             resultSet.getTimestamp("now"),
                             new PairOfDuelist<>(
                                     this.duelistFactory.duelist(
-                                            this.connectionFactory.get(),
                                             resultSet.getString("ad1.user_name"),
                                             resultSet.getInt("ad1.damage"),
                                             resultSet.getInt("ad1.health"),
@@ -97,7 +98,6 @@ public class ActiveDuels implements AutoCloseable {
                                             resultSet.getTimestamp("now")
                                     ),
                                     this.duelistFactory.duelist(
-                                            this.connectionFactory.get(),
                                             resultSet.getString("ad2.user_name"),
                                             resultSet.getInt("ad2.damage"),
                                             resultSet.getInt("ad2.health"),
@@ -124,7 +124,8 @@ public class ActiveDuels implements AutoCloseable {
                 + "SELECT user_name FROM active_duelists "
                 + "WHERE user_name = ?";
         final boolean result;
-        try (final PreparedStatement statement = this.connectionFactory.get().prepareStatement(query)) {
+        try (final PreparedStatement statement
+                     = this.connectionFactory.get().prepareStatement(query)) {
             statement.setString(1, userName);
             try (final ResultSet resultSet = statement.executeQuery()) {
                 result = resultSet.next();

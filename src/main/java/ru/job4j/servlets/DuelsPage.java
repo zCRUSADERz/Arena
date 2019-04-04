@@ -48,6 +48,7 @@ public class DuelsPage extends HttpServlet {
         if ("start".equals(action) && !waitingFight) {
             try {
                 this.queue.offer(userName);
+                Thread.sleep(50);
             } catch (InterruptedException ex) {
                 throw new IllegalStateException(ex);
             }

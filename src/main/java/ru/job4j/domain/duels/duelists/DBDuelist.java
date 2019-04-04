@@ -8,25 +8,26 @@ import ru.job4j.domain.duels.logs.results.SimpleAttackResult;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.function.Supplier;
 
-public class DBDuelist implements SimpleDuelist {
+public class DBDuelist implements SimpleDuelist, AutoCloseable {
     private final String userName;
     private final int damage;
     private final int health;
     private final Activity lastActivity;
     private final AttackCondition attackCondition;
-    private final Connection connection;
+    private final Supplier<Connection> connectionFactory;
 
     public DBDuelist(final String userName, final int damage, final int health,
                      final Activity lastActivity,
                      final AttackCondition attackCondition,
-                     final Connection connection) {
+                     final Supplier<Connection> connectionFactory) {
         this.userName = userName;
         this.damage = damage;
         this.health = health;
         this.lastActivity = lastActivity;
         this.attackCondition = attackCondition;
-        this.connection = connection;
+        this.connectionFactory = connectionFactory;
     }
 
     @Override
@@ -71,7 +72,7 @@ public class DBDuelist implements SimpleDuelist {
                 + "SET health = ? "
                 + "WHERE user_name = ?";
         try (final PreparedStatement statement
-                     = this.connection.prepareStatement(attackQuery)) {
+                     = this.connectionFactory.get().prepareStatement(attackQuery)) {
             statement.setInt(1, newTargetHealth);
             statement.setString(2, target.userName);
             if (statement.executeUpdate() != 1) {
@@ -84,5 +85,10 @@ public class DBDuelist implements SimpleDuelist {
             throw new IllegalStateException(ex);
         }
         return result;
+    }
+
+    @Override
+    public final void close() throws Exception {
+        this.connectionFactory.get().close();
     }
 }

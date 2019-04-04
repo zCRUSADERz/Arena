@@ -67,7 +67,8 @@ CREATE TABLE `duels_history`
   `duel_id`  int(11)   NOT NULL,
   `created`  timestamp NOT NULL,
   `finished` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (`duel_id`)
+  PRIMARY KEY (`duel_id`),
+  KEY `duels_history_finished_idx` (`finished`) USING BTREE
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8;
 

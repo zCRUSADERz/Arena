@@ -4,14 +4,15 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.function.Supplier;
 
-public class DBLastActivity implements Activity {
+public class DBLastActivity implements Activity, AutoCloseable {
     private final String userName;
-    private final Connection connection;
+    private final Supplier<Connection> connectionFactory;
 
-    public DBLastActivity(final String userName, final Connection connection) {
+    public DBLastActivity(final String userName, final Supplier<Connection> connectionFactory) {
         this.userName = userName;
-        this.connection = connection;
+        this.connectionFactory = connectionFactory;
     }
 
     @Override
@@ -20,7 +21,8 @@ public class DBLastActivity implements Activity {
         final String query = ""
                 + "SELECT last_activity FROM active_duelists "
                 + "WHERE user_name = ?";
-        try (final PreparedStatement statement = this.connection.prepareStatement(query)) {
+        try (final PreparedStatement statement
+                     = this.connectionFactory.get().prepareStatement(query)) {
             statement.setString(1, this.userName);
             try (final ResultSet resultSet = statement.executeQuery()) {
                 if (resultSet.next()) {
@@ -46,7 +48,8 @@ public class DBLastActivity implements Activity {
                 + "UPDATE active_duelists "
                 + "SET last_activity = CURRENT_TIMESTAMP(3) + ? "
                 + "WHERE user_name = ?";
-        try (final PreparedStatement statement = this.connection.prepareStatement(query)) {
+        try (final PreparedStatement statement
+                     = this.connectionFactory.get().prepareStatement(query)) {
             statement.setDouble(1, delay);
             statement.setString(2, this.userName);
             if (statement.executeUpdate() != 1) {
@@ -58,5 +61,10 @@ public class DBLastActivity implements Activity {
         } catch (final SQLException ex) {
             throw new IllegalStateException(ex);
         }
+    }
+
+    @Override
+    public void close() throws Exception {
+        this.connectionFactory.get().close();
     }
 }

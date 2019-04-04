@@ -77,12 +77,13 @@ public class Duels {
                     users.upgrade(result);
                 }
             } catch (final Exception ex) {
-            conn.rollback();
-            throw ex;
-        } finally {
-            conn.setTransactionIsolation(defaultTransactionIsolation);
-            conn.setAutoCommit(true);
-        }
+                conn.rollback();
+                throw ex;
+            } finally {
+                conn.commit();
+                conn.setTransactionIsolation(defaultTransactionIsolation);
+                conn.setAutoCommit(true);
+            }
         } catch (final SQLException ex) {
             throw new IllegalStateException(ex);
         }

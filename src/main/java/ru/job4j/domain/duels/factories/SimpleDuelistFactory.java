@@ -11,12 +11,16 @@ import ru.job4j.domain.duels.duelists.Duelist;
 import java.sql.Connection;
 import java.sql.Timestamp;
 import java.util.TimeZone;
+import java.util.function.Supplier;
 
-public class SimpleDuelistFactory implements DuelistFactory {
+public class SimpleDuelistFactory implements DuelistFactory, AutoCloseable {
     private final int turnDuration;
+    private final Supplier<Connection> connectionFactory;
 
-    public SimpleDuelistFactory(final int turnDuration) {
+    public SimpleDuelistFactory(final int turnDuration,
+                                final Supplier<Connection> connectionFactory) {
         this.turnDuration = turnDuration;
+        this.connectionFactory = connectionFactory;
     }
 
     @Override
@@ -34,7 +38,7 @@ public class SimpleDuelistFactory implements DuelistFactory {
     }
 
     @Override
-    public final DBDuelist duelist(final Connection conn, final String userName,
+    public final DBDuelist duelist(final String userName,
                                    final int damage, final int health,
                                    final Timestamp lastActivity,
                                    final Timestamp now) {
@@ -44,13 +48,21 @@ public class SimpleDuelistFactory implements DuelistFactory {
                 health,
                 new LastActivityWrapper(
                         new ConstantLastActivity(lastActivity),
-                        new DBLastActivity(userName, conn)
+                        new DBLastActivity(
+                                userName,
+                                this.connectionFactory
+                        )
                 ),
                 new AttackConditionOnTimer(
                         this.turnDuration,
                         now::getTime
                 ),
-                conn
+                this.connectionFactory
         );
+    }
+
+    @Override
+    public final void close() throws Exception {
+        this.connectionFactory.get().close();
     }
 }

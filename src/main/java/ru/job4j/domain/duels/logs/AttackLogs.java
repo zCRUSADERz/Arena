@@ -1,5 +1,7 @@
 package ru.job4j.domain.duels.logs;
 
+import ru.job4j.domain.duels.factories.LogsFactory;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -7,21 +9,27 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.function.Supplier;
 
-public class AttackLogs {
-    private final Connection connection;
+public class AttackLogs implements LogsFactory, AutoCloseable {
+    private final Supplier<Connection> connectionFactory;
+    private final String logTable;
 
-    public AttackLogs(final Connection connection) {
-        this.connection = connection;
+    public AttackLogs(final Supplier<Connection> connectionFactory,
+                      final String logTable) {
+        this.connectionFactory = connectionFactory;
+        this.logTable = logTable;
     }
 
     public final Collection<AttackLog> logs(final int duelId) {
-        final String query = ""
+        final String query = String.format(""
                 + "SELECT attacker_name, target_name, damage "
-                + "FROM attack_log  WHERE duel_id = ? "
-                + "ORDER BY time";
+                + "FROM %s  WHERE duel_id = ? "
+                + "ORDER BY time",
+                this.logTable
+        );
         final Collection<AttackLog> result;
-        try (PreparedStatement statement = this.connection.prepareStatement(query)) {
+        try (PreparedStatement statement = this.connectionFactory.get().prepareStatement(query)) {
             statement.setInt(1, duelId);
             try (final ResultSet resultSet = statement.executeQuery()) {
                 if (resultSet.next()) {
@@ -46,10 +54,12 @@ public class AttackLogs {
 
     public final void create(final String attackerName, final int duelId,
                              final String targetName, final int damage) {
-        final String query = ""
-                + "INSERT INTO attack_log (attacker_name, duel_id, target_name, damage) "
-                + "VALUES (?, ?, ?, ?);";
-        try (final PreparedStatement statement = this.connection.prepareStatement(query)) {
+        final String query = String.format(""
+                + "INSERT INTO %s (attacker_name, duel_id, target_name, damage) "
+                + "VALUES (?, ?, ?, ?)",
+                this.logTable
+        );
+        try (final PreparedStatement statement = this.connectionFactory.get().prepareStatement(query)) {
             statement.setString(1, attackerName);
             statement.setInt(2, duelId);
             statement.setString(3, targetName);
@@ -64,5 +74,10 @@ public class AttackLogs {
         } catch (final SQLException ex) {
             throw new IllegalStateException(ex);
         }
+    }
+
+    @Override
+    public void close() throws Exception {
+        this.connectionFactory.get().close();
     }
 }

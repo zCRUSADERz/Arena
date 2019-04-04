@@ -7,7 +7,7 @@ public class SimpleAttackResult implements AttackResult {
     private final int damageDone;
 
     public SimpleAttackResult(final String attacker, final String target,
-                        final boolean killed, final int damageDone) {
+                              final boolean killed, final int damageDone) {
         this.attacker = attacker;
         this.target = target;
         this.killed = killed;

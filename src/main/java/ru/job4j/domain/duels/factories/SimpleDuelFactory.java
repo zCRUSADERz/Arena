@@ -9,7 +9,6 @@ import ru.job4j.domain.duels.duelists.PairOfDuelist;
 import ru.job4j.domain.duels.logs.AttackLog;
 import ru.job4j.domain.duels.logs.AttackLogs;
 
-import java.sql.Connection;
 import java.sql.Timestamp;
 import java.util.Collection;
 
@@ -18,9 +17,12 @@ public class SimpleDuelFactory implements DuelFactory {
      * Duel start delay in seconds.
      */
     private final int duelStartDelay;
+    private final AttackLogs attackLogs;
 
-    public SimpleDuelFactory(final int duelStartDelay) {
+    public SimpleDuelFactory(final int duelStartDelay,
+                             final AttackLogs attackLogs) {
         this.duelStartDelay = duelStartDelay;
+        this.attackLogs = attackLogs;
     }
 
     @Override
@@ -37,8 +39,8 @@ public class SimpleDuelFactory implements DuelFactory {
     }
 
     @Override
-    public final DBDuel duel(final Connection connection, final int duelId,
-                             final Timestamp created, final Timestamp now,
+    public final DBDuel duel(final int duelId, final Timestamp created,
+                             final Timestamp now,
                              final PairOfDuelist<DBDuelist> duelists) {
         return new DBDuel(
                 duelId,
@@ -46,7 +48,7 @@ public class SimpleDuelFactory implements DuelFactory {
                         created, now, this.duelStartDelay
                 ),
                 duelists,
-                new AttackLogs(connection)
+                this.attackLogs
         );
     }
 }
