@@ -1,5 +1,6 @@
 package ru.job4j.domain.duels;
 
+import ru.job4j.domain.duels.duelists.AttackResult;
 import ru.job4j.domain.duels.duelists.PairOfDuelist;
 import ru.job4j.domain.duels.factories.DuelFactory;
 import ru.job4j.domain.duels.factories.DuelistFactory;
@@ -74,7 +75,8 @@ public class ActiveDuels {
         return result;
     }
 
-    public final void turn(final String userName) {
+    public final AttackResult turn(final String userName) {
+        final AttackResult result;
         try (final Connection conn = this.dataSource.getConnection()) {
             conn.setAutoCommit(false);
             final int defaultTransactionIsolation = conn.getTransactionIsolation();
@@ -118,7 +120,7 @@ public class ActiveDuels {
                         }
                     }
                 }
-                duel.turn(userName);
+                result = duel.turn(userName);
             } catch (final Exception ex) {
                 conn.rollback();
                 throw ex;
@@ -129,6 +131,7 @@ public class ActiveDuels {
         } catch (final SQLException ex) {
             throw new IllegalStateException(ex);
         }
+        return result;
     }
 
     public final boolean inDuel(final String userName) {

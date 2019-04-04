@@ -17,10 +17,9 @@ public class AttackLogs {
 
     public final Collection<AttackLog> logs(final int duelId) {
         final String query = ""
-                + "SELECT l.attacker_name, l.target_name, ad.damage "
-                + "FROM attack_log AS l JOIN active_duelists AS ad "
-                + "ON l.attacker_name = ad.user_name AND ad.duel_id = ? "
-                + "ORDER BY l.time";
+                + "SELECT attacker_name, target_name, damage "
+                + "FROM attack_log  WHERE duel_id = ? "
+                + "ORDER BY time";
         final Collection<AttackLog> result;
         try (PreparedStatement statement = this.connection.prepareStatement(query)) {
             statement.setInt(1, duelId);
@@ -29,10 +28,10 @@ public class AttackLogs {
                     result = new ArrayList<>();
                     do {
                         result.add(
-                                new AttackLog(
-                                        resultSet.getString("l.attacker_name"),
-                                        resultSet.getString("l.target_name"),
-                                        resultSet.getInt("ad.damage")
+                                new SimpleAttackLog(
+                                        resultSet.getString("attacker_name"),
+                                        resultSet.getString("target_name"),
+                                        resultSet.getInt("damage")
                         ));
                     } while (resultSet.next());
                 } else {
@@ -46,14 +45,15 @@ public class AttackLogs {
     }
 
     public final void create(final String attackerName, final int duelId,
-                             final String targetName) {
+                             final String targetName, final int damage) {
         final String query = ""
-                + "INSERT INTO attack_log (attacker_name, duel_id, target_name) "
-                + "VALUES (?, ?, ?);";
+                + "INSERT INTO attack_log (attacker_name, duel_id, target_name, damage) "
+                + "VALUES (?, ?, ?, ?);";
         try (final PreparedStatement statement = this.connection.prepareStatement(query)) {
             statement.setString(1, attackerName);
             statement.setInt(2, duelId);
             statement.setString(3, targetName);
+            statement.setInt(4, damage);
             if (statement.executeUpdate() != 1) {
                 throw new IllegalStateException(String.format(
                         "Error creating a record in the battle log."

@@ -1,6 +1,7 @@
 package ru.job4j.domain.duels;
 
 import ru.job4j.domain.duels.conditions.DuelStartCondition;
+import ru.job4j.domain.duels.duelists.AttackResult;
 import ru.job4j.domain.duels.duelists.DBDuelist;
 import ru.job4j.domain.duels.duelists.PairOfDuelist;
 import ru.job4j.domain.duels.logs.AttackLogs;
@@ -22,7 +23,7 @@ public class DBDuel {
         this.attackLogs = attackLogs;
     }
 
-    public final void turn(final String userName) throws SQLException {
+    public final AttackResult turn(final String userName) throws SQLException {
         if (!this.startCondition.started()) {
             throw new IllegalStateException(String.format(
                     "Duel: %s, not started. %s",
@@ -31,7 +32,12 @@ public class DBDuel {
         }
         final DBDuelist user = this.duelists.duelist(userName);
         final DBDuelist opponent = this.duelists.opponent(userName);
-        user.attack(opponent);
-        this.attackLogs.create(user.name(), this.duelId, opponent.name());
+        final AttackResult result = user.attack(opponent);
+        if (!result.killed()) {
+            this.attackLogs.create(
+                    user.name(), this.duelId, opponent.name(), result.damage()
+            );
+        }
+        return result;
     }
 }
