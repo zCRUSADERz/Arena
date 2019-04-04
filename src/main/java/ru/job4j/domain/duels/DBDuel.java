@@ -1,12 +1,10 @@
 package ru.job4j.domain.duels;
 
 import ru.job4j.domain.duels.conditions.DuelStartCondition;
-import ru.job4j.domain.duels.logs.AttackResult;
 import ru.job4j.domain.duels.duelists.DBDuelist;
 import ru.job4j.domain.duels.duelists.PairOfDuelist;
 import ru.job4j.domain.duels.logs.AttackLogs;
-
-import java.sql.SQLException;
+import ru.job4j.domain.duels.logs.results.AttackResult;
 
 public class DBDuel {
     private final int duelId;
@@ -27,7 +25,7 @@ public class DBDuel {
         return this.duelId;
     }
 
-    public final AttackResult turn(final String userName) throws SQLException {
+    public final AttackResult turn(final String userName) {
         if (!this.startCondition.started()) {
             throw new IllegalStateException(String.format(
                     "Duel: %s, not started. %s",

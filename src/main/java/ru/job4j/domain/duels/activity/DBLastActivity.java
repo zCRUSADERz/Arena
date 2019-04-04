@@ -41,7 +41,7 @@ public class DBLastActivity implements Activity {
     }
 
     @Override
-    public final void update(final double delay) throws SQLException {
+    public final void update(final double delay) {
         final String query = ""
                 + "UPDATE active_duelists "
                 + "SET last_activity = CURRENT_TIMESTAMP(3) + ? "
@@ -55,6 +55,8 @@ public class DBLastActivity implements Activity {
                         this.userName
                 ));
             }
+        } catch (final SQLException ex) {
+            throw new IllegalStateException(ex);
         }
     }
 }

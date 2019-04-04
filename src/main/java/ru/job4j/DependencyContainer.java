@@ -5,6 +5,7 @@ import ru.job4j.db.ConnectionHandler;
 import ru.job4j.db.DBConfig;
 import ru.job4j.db.DataSourceWrapper;
 import ru.job4j.db.StatementHandler;
+import ru.job4j.db.factories.ConstantConnectionFactory;
 import ru.job4j.domain.*;
 import ru.job4j.domain.duels.*;
 import ru.job4j.domain.duels.factories.SimpleDuelFactory;
@@ -14,6 +15,8 @@ import ru.job4j.domain.duels.logs.FinalBlows;
 import ru.job4j.domain.queue.UsersQueue;
 import ru.job4j.domain.queue.UsersQueueConsumer;
 
+import java.util.function.Supplier;
+
 public class DependencyContainer {
     private final static HikariDataSource DB_SOURCE;
     private final static ThreadLocal<Integer> QUERY_COUNTER;
@@ -21,7 +24,8 @@ public class DependencyContainer {
     private final static ThreadLocal<Long> REQUEST_TIMER;
     private final static UsersAuthentication USERS_AUTHENTICATION;
     private final static UsersQueue USERS_QUEUE;
-    private final static ActiveDuels ACTIVE_DUELS;
+    private final static Duels DUELS;
+    private final static Supplier<ActiveDuels> ACTIVE_DUELS;
 
     static {
         QUERY_COUNTER = ThreadLocal.withInitial(() -> 0);
@@ -39,28 +43,38 @@ public class DependencyContainer {
                 )
         );
         USERS_AUTHENTICATION = new UsersAuthentication(
-                new Users(
-                        DB_SOURCE
-                )
+                () -> new Users(new ConstantConnectionFactory(DB_SOURCE))
+        );
+        DUELS = new Duels(
+                DB_SOURCE,
+                connection -> new ActiveDuels(
+                        () -> connection,
+                        new SimpleDuelistFactory(5000),
+                        new SimpleDuelFactory(1),
+                        (connectionInner, duelID) ->
+                                new AttackLogs(connectionInner).logs(duelID)
+                ),
+                connection -> new FinishedDuels(
+                        connection,
+                        new FinalBlows(connection)
+                ),
+                connection -> new Users(() -> connection)
         );
         USERS_QUEUE = new UsersQueue();
         final String defaultUserName = "";
         new Thread(
                 new UsersQueueConsumer(
                         usersQueue(),
-                        new Duels(DB_SOURCE),
+                        DUELS,
                         defaultUserName
                 )
         ).start();
-        ACTIVE_DUELS = new ActiveDuels(
-                DB_SOURCE,
+        ACTIVE_DUELS = () -> new ActiveDuels(
+                new ConstantConnectionFactory(DB_SOURCE),
                 new SimpleDuelistFactory(5000),
                 new SimpleDuelFactory(1),
-                (connection, duelID) -> new AttackLogs(connection).logs(duelID),
-                (connection) -> new FinishedDuels(
-                        connection,
-                        new FinalBlows(connection)
-                )
+                (connectionInner, duelID) ->
+                        new AttackLogs(connectionInner).logs(duelID)
         );
     }
 
@@ -84,7 +98,11 @@ public class DependencyContainer {
         return USERS_QUEUE;
     }
 
-    public static ActiveDuels activeDuels() {
+    public static Supplier<ActiveDuels> activeDuels() {
         return ACTIVE_DUELS;
+    }
+
+    public static Duels duels() {
+        return DUELS;
     }
 }

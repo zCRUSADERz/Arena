@@ -1,12 +1,12 @@
-package ru.job4j.domain.duels.logs;
+package ru.job4j.domain.duels.logs.results;
 
-public class AttackResult {
+public class SimpleAttackResult implements AttackResult {
     private final String attacker;
     private final String target;
     private final boolean killed;
     private final int damageDone;
 
-    public AttackResult(final String attacker, final String target,
+    public SimpleAttackResult(final String attacker, final String target,
                         final boolean killed, final int damageDone) {
         this.attacker = attacker;
         this.target = target;

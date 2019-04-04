@@ -8,37 +8,40 @@ import javax.servlet.http.HttpFilter;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-import java.io.IOException;
+import java.util.function.Supplier;
 
 public class FightingFilter extends HttpFilter {
-    private ActiveDuels activeDuels;
+    private Supplier<ActiveDuels> activeDuelsFactory;
 
     @Override
     public final void init(final FilterConfig filterConfig) {
-        this.activeDuels = DependencyContainer.activeDuels();
+        this.activeDuelsFactory = DependencyContainer.activeDuels();
     }
 
     @Override
     public final void doFilter(final HttpServletRequest req,
                                final HttpServletResponse resp,
-                               final FilterChain chain)
-            throws IOException, ServletException {
+                               final FilterChain chain) throws ServletException {
         HttpSession session = req.getSession();
         final String userName = (String) session.getAttribute("userName");
         final String requestURI = req.getRequestURI();
-        if (this.activeDuels.inDuel(userName)) {
-            req.setAttribute("fighting", true);
-            if (requestURI.equals("/arena/duel")) {
-                chain.doFilter(req, resp);
+        try (final ActiveDuels activeDuels = this.activeDuelsFactory.get()) {
+            if (activeDuels.inDuel(userName)) {
+                req.setAttribute("fighting", true);
+                if (requestURI.equals("/arena/duel")) {
+                    chain.doFilter(req, resp);
+                } else {
+                    resp.sendRedirect(req.getContextPath() + "/arena/duel");
+                }
             } else {
-                resp.sendRedirect(req.getContextPath() + "/arena/duel");
+                if (requestURI.equals("/arena/duel")) {
+                    resp.sendRedirect(req.getContextPath() + "/arena");
+                } else {
+                    chain.doFilter(req, resp);
+                }
             }
-        } else {
-            if (requestURI.equals("/arena/duel")) {
-                resp.sendRedirect(req.getContextPath() + "/arena");
-            } else {
-                chain.doFilter(req, resp);
-            }
+        } catch (final Exception ex) {
+            throw new ServletException(ex);
         }
     }
 }

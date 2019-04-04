@@ -1,7 +1,5 @@
 package ru.job4j.domain.duels.activity;
 
-import java.sql.SQLException;
-
 public class LastActivityWrapper implements Activity {
     private final LastActivity activity;
     private final ActivityUpdateable updateableActivity;
@@ -18,7 +16,7 @@ public class LastActivityWrapper implements Activity {
     }
 
     @Override
-    public final void update(final double delay) throws SQLException {
+    public final void update(final double delay) {
         this.updateableActivity.update(delay);
     }
 }

@@ -2,7 +2,8 @@ package ru.job4j.domain.duels.duelists;
 
 import ru.job4j.domain.duels.activity.Activity;
 import ru.job4j.domain.duels.conditions.AttackCondition;
-import ru.job4j.domain.duels.logs.AttackResult;
+import ru.job4j.domain.duels.logs.results.AttackResult;
+import ru.job4j.domain.duels.logs.results.SimpleAttackResult;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -37,7 +38,7 @@ public class DBDuelist implements SimpleDuelist {
         return this.damage;
     }
 
-    public final AttackResult attack(final DBDuelist target) throws SQLException {
+    public final AttackResult attack(final DBDuelist target) {
         if (!this.attackCondition
                 .canAttack(this.lastActivity, target.lastActivity)) {
             throw new IllegalStateException(String.format(
@@ -56,12 +57,12 @@ public class DBDuelist implements SimpleDuelist {
         final int resultHealth = target.health - this.damage;
         if (resultHealth <= 0) {
             newTargetHealth = 0;
-            result = new AttackResult(
+            result = new SimpleAttackResult(
                     this.userName, target.userName, true, target.health
             );
         } else {
             newTargetHealth = resultHealth;
-            result = new AttackResult(
+            result = new SimpleAttackResult(
                     this.userName, target.userName, false, this.damage
             );
         }
@@ -79,6 +80,8 @@ public class DBDuelist implements SimpleDuelist {
                         target.userName
                 ));
             }
+        } catch (final SQLException ex) {
+            throw new IllegalStateException(ex);
         }
         return result;
     }

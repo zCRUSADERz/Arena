@@ -1,13 +1,26 @@
 package ru.job4j.domain.duels;
 
+import ru.job4j.domain.Users;
+import ru.job4j.domain.duels.logs.results.DuelAttackResult;
+
 import javax.sql.DataSource;
 import java.sql.*;
+import java.util.function.Function;
 
 public class Duels {
     private final DataSource dataSource;
+    private final Function<Connection, ActiveDuels> activeDuelsFactory;
+    private final Function<Connection, FinishedDuels> finishedDuelsFactory;
+    private final Function<Connection, Users> usersFactory;
 
-    public Duels(final DataSource dataSource) {
+    public Duels(final DataSource dataSource,
+                 final Function<Connection, ActiveDuels> activeDuelsFactory,
+                 final Function<Connection, FinishedDuels> finishedDuelsFactory,
+                 final Function<Connection, Users> usersFactory) {
         this.dataSource = dataSource;
+        this.activeDuelsFactory = activeDuelsFactory;
+        this.finishedDuelsFactory = finishedDuelsFactory;
+        this.usersFactory = usersFactory;
     }
 
     public final void create(final String first, final String second)
@@ -44,6 +57,37 @@ public class Duels {
         } catch (final SQLException ex) {
             throw new IllegalStateException(ex);
         }
+    }
+
+    public final DuelAttackResult turn(final String userName) {
+        final DuelAttackResult result;
+        try (final Connection conn = this.dataSource.getConnection()) {
+            conn.setAutoCommit(false);
+            final int defaultTransactionIsolation = conn.getTransactionIsolation();
+            conn.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
+            try {
+                result = this.activeDuelsFactory
+                        .apply(conn)
+                        .turn(userName);
+                if (result.killed()) {
+                    this.finishedDuelsFactory
+                            .apply(conn)
+                            .create(result);
+                    final Users users = this.usersFactory.apply(conn);
+                    users.upgrade(result.attacker());
+                    users.upgrade(result.target());
+                }
+            } catch (final Exception ex) {
+            conn.rollback();
+            throw ex;
+        } finally {
+            conn.setTransactionIsolation(defaultTransactionIsolation);
+            conn.setAutoCommit(true);
+        }
+        } catch (final SQLException ex) {
+            throw new IllegalStateException(ex);
+        }
+        return result;
     }
 
     private void addDueler(final String userName, final int duelId,
