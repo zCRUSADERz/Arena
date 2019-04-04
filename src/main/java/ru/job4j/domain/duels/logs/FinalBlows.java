@@ -14,6 +14,7 @@ public class FinalBlows {
     }
 
     public final AttackLog finalBlow(final int duelID) {
+        //TODO implement final blow log.
         throw new IllegalStateException();
     }
 
