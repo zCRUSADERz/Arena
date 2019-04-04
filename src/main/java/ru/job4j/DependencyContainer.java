@@ -10,6 +10,7 @@ import ru.job4j.domain.duels.*;
 import ru.job4j.domain.duels.factories.SimpleDuelFactory;
 import ru.job4j.domain.duels.factories.SimpleDuelistFactory;
 import ru.job4j.domain.duels.logs.AttackLogs;
+import ru.job4j.domain.duels.logs.FinalBlows;
 import ru.job4j.domain.queue.UsersQueue;
 import ru.job4j.domain.queue.UsersQueueConsumer;
 
@@ -55,7 +56,11 @@ public class DependencyContainer {
                 DB_SOURCE,
                 new SimpleDuelistFactory(5000),
                 new SimpleDuelFactory(1),
-                (connection, duelID) -> new AttackLogs(connection).logs(duelID)
+                (connection, duelID) -> new AttackLogs(connection).logs(duelID),
+                (connection) -> new FinishedDuels(
+                        connection,
+                        new FinalBlows(connection)
+                )
         );
     }
 

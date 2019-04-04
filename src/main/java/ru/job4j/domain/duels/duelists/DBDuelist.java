@@ -2,6 +2,7 @@ package ru.job4j.domain.duels.duelists;
 
 import ru.job4j.domain.duels.activity.Activity;
 import ru.job4j.domain.duels.conditions.AttackCondition;
+import ru.job4j.domain.duels.logs.AttackResult;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -53,12 +54,16 @@ public class DBDuelist implements SimpleDuelist {
         final int newTargetHealth;
         final AttackResult result;
         final int resultHealth = target.health - this.damage;
-        if (resultHealth < 0) {
+        if (resultHealth <= 0) {
             newTargetHealth = 0;
-            result = new AttackResult(true, target.health);
+            result = new AttackResult(
+                    this.userName, target.userName, true, target.health
+            );
         } else {
             newTargetHealth = resultHealth;
-            result = new AttackResult(false, this.damage);
+            result = new AttackResult(
+                    this.userName, target.userName, false, this.damage
+            );
         }
         final String attackQuery = ""
                 + "UPDATE active_duelists "

@@ -1,6 +1,6 @@
 package ru.job4j.domain.duels;
 
-import ru.job4j.domain.duels.duelists.AttackResult;
+import ru.job4j.domain.duels.logs.AttackResult;
 import ru.job4j.domain.duels.duelists.PairOfDuelist;
 import ru.job4j.domain.duels.factories.DuelFactory;
 import ru.job4j.domain.duels.factories.DuelistFactory;
@@ -8,6 +8,7 @@ import ru.job4j.domain.duels.factories.LogsFactory;
 
 import javax.sql.DataSource;
 import java.sql.*;
+import java.util.function.Function;
 
 public class ActiveDuels {
     private final static String DUEL_SELECT = ""
@@ -23,15 +24,18 @@ public class ActiveDuels {
     private final DuelistFactory duelistFactory;
     private final DuelFactory duelFactory;
     private final LogsFactory logsFactory;
+    private final Function<Connection, FinishedDuels> finishedDuelsFactory;
 
     public ActiveDuels(final DataSource dataSource,
                        final DuelistFactory duelistFactory,
                        final DuelFactory duelFactory,
-                       final LogsFactory logsFactory) {
+                       final LogsFactory logsFactory,
+                       final Function<Connection, FinishedDuels> finishedDuelsFactory) {
         this.dataSource = dataSource;
         this.duelistFactory = duelistFactory;
         this.duelFactory = duelFactory;
         this.logsFactory = logsFactory;
+        this.finishedDuelsFactory = finishedDuelsFactory;
     }
 
     public final Duel duel(final String userName) {
@@ -121,6 +125,9 @@ public class ActiveDuels {
                     }
                 }
                 result = duel.turn(userName);
+                if (result.killed()) {
+                    this.finishedDuelsFactory.apply(conn).create(duel.id(), result);
+                }
             } catch (final Exception ex) {
                 conn.rollback();
                 throw ex;

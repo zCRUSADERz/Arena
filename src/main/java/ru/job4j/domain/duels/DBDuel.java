@@ -1,7 +1,7 @@
 package ru.job4j.domain.duels;
 
 import ru.job4j.domain.duels.conditions.DuelStartCondition;
-import ru.job4j.domain.duels.duelists.AttackResult;
+import ru.job4j.domain.duels.logs.AttackResult;
 import ru.job4j.domain.duels.duelists.DBDuelist;
 import ru.job4j.domain.duels.duelists.PairOfDuelist;
 import ru.job4j.domain.duels.logs.AttackLogs;
@@ -21,6 +21,10 @@ public class DBDuel {
         this.startCondition = startCondition;
         this.duelists = duelists;
         this.attackLogs = attackLogs;
+    }
+
+    public final int id() {
+        return this.duelId;
     }
 
     public final AttackResult turn(final String userName) throws SQLException {
