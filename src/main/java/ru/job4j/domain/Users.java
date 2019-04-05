@@ -27,8 +27,8 @@ public class Users implements AutoCloseable {
             try (final ResultSet resultSet = statement.executeQuery()) {
                 if (resultSet.next()) {
                     result = Optional.of(new RegisteredUser(
-                            resultSet.getString(1),
-                            resultSet.getString(2)
+                            resultSet.getString("name"),
+                            resultSet.getBytes("password")
                     ));
                 } else {
                     result = Optional.empty();
@@ -47,7 +47,7 @@ public class Users implements AutoCloseable {
         try (final PreparedStatement statement
                      = this.connectionFactory.get().prepareStatement(insert)) {
             statement.setString(1, user.name());
-            statement.setString(2, user.password());
+            statement.setBytes(2, user.password());
             final int rows = statement.executeUpdate();
             if (rows != 1) {
                 errors = Map.of("name", "Username is already taken");

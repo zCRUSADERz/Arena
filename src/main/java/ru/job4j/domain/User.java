@@ -4,5 +4,5 @@ public interface User {
 
     String name();
 
-    String password();
+    byte[] password();
 }

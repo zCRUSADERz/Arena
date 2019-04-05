@@ -3,9 +3,7 @@ CREATE TABLE `users`
   `name`     varchar(25)
                CHARACTER SET 'utf8'
                  COLLATE 'utf8_bin' NOT NULL,
-  `password` varchar(30)
-               CHARACTER SET 'utf8'
-                 COLLATE 'utf8_bin' NOT NULL,
+  `password` binary(64)             NOT NULL,
   `health`   int(11)                NOT NULL DEFAULT '100',
   `damage`   int(11)                NOT NULL DEFAULT '10',
   `rating`   int(11)                NOT NULL DEFAULT '0',

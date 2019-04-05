@@ -1,5 +1,7 @@
 package ru.job4j.domain;
 
+import java.util.Arrays;
+
 public class UsersCredentials {
     private final User first;
     private final User second;
@@ -11,6 +13,6 @@ public class UsersCredentials {
 
     public final boolean match() {
         return this.first.name().equals(this.second.name())
-                && this.first.password().equals(this.second.password());
+                && Arrays.equals(this.first.password(), this.second.password());
     }
 }

@@ -2,9 +2,9 @@ package ru.job4j.domain;
 
 public class RegisteredUser implements User {
     private final String name;
-    private final String password;
+    private final byte[] password;
 
-    public RegisteredUser(final String name, final String password) {
+    public RegisteredUser(final String name, final byte[] password) {
         this.name = name;
         this.password = password;
     }
@@ -15,7 +15,7 @@ public class RegisteredUser implements User {
     }
 
     @Override
-    public final String password() {
+    public final byte[] password() {
         return this.password;
     }
 }

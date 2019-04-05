@@ -4,20 +4,25 @@ import org.cactoos.scalar.StickyScalar;
 import org.cactoos.scalar.UncheckedScalar;
 
 import javax.servlet.http.HttpServletRequest;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
 import java.util.HashMap;
 import java.util.Map;
 
 public class UnverifiedUser implements User {
     private final HttpServletRequest request;
     private final UncheckedScalar<Map<String, String>> validateErrors;
+    private final MessageDigest messageDigest;
 
-    public UnverifiedUser(final HttpServletRequest request) {
+    public UnverifiedUser(final HttpServletRequest request,
+                          final MessageDigest messageDigest) {
         this.request = request;
         this.validateErrors = new UncheckedScalar<>(
                 new StickyScalar<>(
                         () -> new RequestUser(request).validate()
                 )
         );
+        this.messageDigest = messageDigest;
     }
 
     @Override
@@ -29,11 +34,14 @@ public class UnverifiedUser implements User {
     }
 
     @Override
-    public final String password() {
+    public final byte[] password() {
         if (!this.isValid()) {
             throw new IllegalStateException("Request user invalid!");
         }
-        return this.request.getParameter("password");
+        final String password = this.request.getParameter("password");
+        return messageDigest.digest(
+                password.getBytes(StandardCharsets.UTF_8)
+        );
     }
 
     public final boolean isValid() {

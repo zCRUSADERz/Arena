@@ -7,8 +7,13 @@ import ru.job4j.db.DataSourceWrapper;
 import ru.job4j.db.StatementHandler;
 import ru.job4j.db.factories.ConnectionFactory;
 import ru.job4j.db.factories.ConstantConnectionFactory;
-import ru.job4j.domain.*;
-import ru.job4j.domain.duels.*;
+import ru.job4j.domain.MessageDigestFactory;
+import ru.job4j.domain.UnverifiedUser;
+import ru.job4j.domain.Users;
+import ru.job4j.domain.UsersAuthentication;
+import ru.job4j.domain.duels.ActiveDuels;
+import ru.job4j.domain.duels.Duels;
+import ru.job4j.domain.duels.FinishedDuels;
 import ru.job4j.domain.duels.factories.SimpleDuelFactory;
 import ru.job4j.domain.duels.factories.SimpleDuelistFactory;
 import ru.job4j.domain.duels.logs.AttackLogs;
@@ -18,6 +23,8 @@ import ru.job4j.domain.queue.UsersQueue;
 import ru.job4j.domain.queue.UsersQueueConsumer;
 import ru.job4j.domain.rating.UsersRating;
 
+import javax.servlet.http.HttpServletRequest;
+import java.security.MessageDigest;
 import java.sql.Connection;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -27,6 +34,7 @@ public class DependencyContainer {
     private final static ThreadLocal<Integer> QUERY_COUNTER;
     private final static ThreadLocal<Long> QUERY_TIMER;
     private final static ThreadLocal<Long> REQUEST_TIMER;
+    private final static Function<HttpServletRequest, UnverifiedUser> USERS_FACTORY;
     private final static UsersAuthentication USERS_AUTHENTICATION;
     private final static Supplier<UsersRating> USERS_RATING;
     private final static UsersQueue USERS_QUEUE;
@@ -38,6 +46,7 @@ public class DependencyContainer {
         final int turnDuration = 10000;
         final int duelStartDelay = 30;
         final String defaultUserName = "";
+        final String passSalt = "8w@8c4!48kww&0g";
         QUERY_COUNTER = ThreadLocal.withInitial(() -> 0);
         QUERY_TIMER = ThreadLocal.withInitial(() -> 0L);
         REQUEST_TIMER = ThreadLocal.withInitial(() -> 0L);
@@ -86,6 +95,9 @@ public class DependencyContainer {
                                 )
                         )
                 );
+        final MessageDigest messageDigest
+                = new MessageDigestFactory(passSalt).messageDigest();
+        USERS_FACTORY = httpRequest -> new UnverifiedUser(httpRequest, messageDigest);
         USERS_AUTHENTICATION = new UsersAuthentication(
                 () -> new Users(new ConstantConnectionFactory(DB_SOURCE))
         );
@@ -144,5 +156,9 @@ public class DependencyContainer {
 
     public static Supplier<FinishedDuels> finishedDuels() {
         return FINISHED_DUELS;
+    }
+
+    public static Function<HttpServletRequest, UnverifiedUser> usersFactory() {
+        return USERS_FACTORY;
     }
 }

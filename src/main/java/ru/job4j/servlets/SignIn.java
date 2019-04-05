@@ -11,9 +11,11 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.util.Map;
+import java.util.function.Function;
 
 public class SignIn extends HttpServlet {
     private UsersAuthentication authentication;
+    private Function<HttpServletRequest, UnverifiedUser> userFactory;
 
     @Override
     public final void doGet(final HttpServletRequest req,
@@ -28,7 +30,7 @@ public class SignIn extends HttpServlet {
     public final void doPost(final HttpServletRequest req,
                              final HttpServletResponse resp)
             throws ServletException, IOException {
-        final UnverifiedUser user = new UnverifiedUser(req);
+        final UnverifiedUser user = this.userFactory.apply(req);
         final Map<String, String> errors = this.authentication.authorize(user);
         if (errors.isEmpty()) {
             HttpSession session = req.getSession();
@@ -44,5 +46,6 @@ public class SignIn extends HttpServlet {
     public final void init() throws ServletException {
         super.init();
         this.authentication = DependencyContainer.usersAuthentication();
+        this.userFactory = DependencyContainer.usersFactory();
     }
 }
