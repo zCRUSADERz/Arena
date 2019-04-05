@@ -88,8 +88,9 @@ public class FinishedDuels implements AutoCloseable {
                 }
             }
             final String copyDuelists = ""
-                    + "INSERT INTO duelists_history (user_name, duel_id, health, damage) "
-                    + "SELECT user_name, duel_id, health, damage "
+                    + "INSERT INTO duelists_history "
+                    + "(user_name, duel_id, start_health, health, damage) "
+                    + "SELECT user_name, duel_id, start_health, health, damage "
                     + "FROM active_duelists WHERE duel_id = ?";
             try (final PreparedStatement statement = this.connectionFactory.get().prepareStatement(copyDuelists)) {
                 statement.setInt(1, attackResult.duelID());

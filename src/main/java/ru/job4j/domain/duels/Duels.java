@@ -93,9 +93,10 @@ public class Duels {
     private void addDueler(final String userName, final int duelId,
                            final Connection connection) throws SQLException {
         final String query = ""
-                + "INSERT INTO active_duelists (user_name, duel_id, health, damage) "
-                + "SELECT name, ? AS duel_id, health, damage FROM users "
-                + "WHERE name = ?";
+                + "INSERT INTO active_duelists "
+                + "(user_name, duel_id, start_health, health, damage) "
+                + "SELECT name, ? AS duel_id, health AS start_health, health, damage "
+                + "FROM users WHERE name = ?";
         try (final PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setInt(1, duelId);
             statement.setString(2, userName);

@@ -1,10 +1,14 @@
 CREATE TABLE `users`
 (
-  `name`     varchar(25) NOT NULL,
-  `password` varchar(30) NOT NULL,
-  `health`   int(11)     NOT NULL DEFAULT '100',
-  `damage`   int(11)     NOT NULL DEFAULT '10',
-  `rating` int(11) NOT NULL DEFAULT '0',
+  `name`     varchar(25)
+               CHARACTER SET 'utf8'
+                 COLLATE 'utf8_bin' NOT NULL,
+  `password` varchar(30)
+               CHARACTER SET 'utf8'
+                 COLLATE 'utf8_bin' NOT NULL,
+  `health`   int(11)                NOT NULL DEFAULT '100',
+  `damage`   int(11)                NOT NULL DEFAULT '10',
+  `rating`   int(11)                NOT NULL DEFAULT '0',
   PRIMARY KEY (`name`)
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8;
@@ -19,11 +23,14 @@ CREATE TABLE `active_duels`
 
 CREATE TABLE `active_duelists`
 (
-  `user_name`     varchar(25)  NOT NULL,
-  `duel_id`       int(11)      NOT NULL,
-  `last_activity` timestamp(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
-  `health`        int(11)      NOT NULL,
-  `damage`        int(11)      NOT NULL,
+  `user_name`     varchar(25)
+                    CHARACTER SET 'utf8'
+                      COLLATE 'utf8_bin' NOT NULL,
+  `duel_id`       int(11)                NOT NULL,
+  `last_activity` timestamp(3)           NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  `start_health`  int(11)                NOT NULL,
+  `health`        int(11)                NOT NULL,
+  `damage`        int(11)                NOT NULL,
   PRIMARY KEY (`user_name`),
   KEY `duel_idx` (`duel_id`),
   CONSTRAINT `active_duelists_duel_id_fk`
@@ -37,11 +44,15 @@ CREATE TABLE `active_duelists`
 
 CREATE TABLE `attack_log`
 (
-  `attacker_name` varchar(25)  NOT NULL,
-  `time`          timestamp(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
-  `duel_id`       int(11)      NOT NULL,
-  `target_name`   varchar(25)  NOT NULL,
-  `damage` int(11) NOT NULL,
+  `attacker_name` varchar(25)
+                    CHARACTER SET 'utf8'
+                      COLLATE 'utf8_bin' NOT NULL,
+  `time`          timestamp(3)           NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  `duel_id`       int(11)                NOT NULL,
+  `target_name`   varchar(25)
+                    CHARACTER SET 'utf8'
+                      COLLATE 'utf8_bin' NOT NULL,
+  `damage`        int(11)                NOT NULL,
   PRIMARY KEY (`attacker_name`, `time`),
   KEY `duel_idx` (`duel_id`),
   KEY `time_idx` (`time`) USING BTREE,
@@ -74,10 +85,12 @@ CREATE TABLE `duels_history`
 
 CREATE TABLE `duelists_history`
 (
-  `user_name` varchar(25) NOT NULL,
-  `duel_id`   int(11)     NOT NULL,
-  `health`    int(11)     NOT NULL,
-  `damage`    int(11)     NOT NULL,
+  `user_name`    varchar(25)
+                   CHARACTER SET 'utf8' COLLATE 'utf8_bin' NOT NULL,
+  `duel_id`      int(11)                                   NOT NULL,
+  `start_health` int(11)                                   NOT NULL,
+  `health`       int(11)                                   NOT NULL,
+  `damage`       int(11)                                   NOT NULL,
   PRIMARY KEY (`user_name`, duel_id),
   KEY `duel_idx` (`duel_id`),
   CONSTRAINT `duelists_history_duel_id_fk`
@@ -91,11 +104,13 @@ CREATE TABLE `duelists_history`
 
 CREATE TABLE `attack_log_history`
 (
-  `attacker_name` varchar(25)  NOT NULL,
-  `time`          timestamp(3) NOT NULL,
-  `duel_id`       int(11)      NOT NULL,
-  `target_name`   varchar(25)  NOT NULL,
-  `damage` int(11) NOT NULL,
+  `attacker_name` varchar(25)
+                    CHARACTER SET 'utf8' COLLATE 'utf8_bin' NOT NULL,
+  `time`          timestamp(3)                              NOT NULL,
+  `duel_id`       int(11)                                   NOT NULL,
+  `target_name`   varchar(25)
+                    CHARACTER SET 'utf8' COLLATE 'utf8_bin' NOT NULL,
+  `damage`        int(11)                                   NOT NULL,
   PRIMARY KEY (`attacker_name`, `time`),
   KEY `duel_idx` (`duel_id`),
   KEY `time_idx` (`time`) USING BTREE,
@@ -115,9 +130,11 @@ CREATE TABLE `attack_log_history`
 
 CREATE TABLE `final_blow`
 (
-  `attacker_name` varchar(25) NOT NULL,
-  `duel_id`       int(11)     NOT NULL,
-  `target_name`   varchar(25) NOT NULL,
+  `attacker_name` varchar(25)
+                    CHARACTER SET 'utf8' COLLATE 'utf8_bin' NOT NULL,
+  `duel_id`       int(11)                                   NOT NULL,
+  `target_name`   varchar(25)
+                    CHARACTER SET 'utf8' COLLATE 'utf8_bin' NOT NULL,
   PRIMARY KEY (`duel_id`),
   KEY `duel_idx` (`duel_id`),
   KEY `final_blow_attacker_fk` (`attacker_name`),
