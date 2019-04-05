@@ -1,9 +1,6 @@
 package ru.job4j;
 
-import com.zaxxer.hikari.HikariDataSource;
 import ru.job4j.db.*;
-import ru.job4j.db.factories.ConnectionFactory;
-import ru.job4j.db.factories.ConstantConnectionFactory;
 import ru.job4j.domain.MessageDigestFactory;
 import ru.job4j.domain.UnverifiedUser;
 import ru.job4j.domain.Users;
@@ -21,24 +18,20 @@ import ru.job4j.domain.queue.UsersQueueConsumer;
 import ru.job4j.domain.rating.UsersRating;
 
 import javax.servlet.http.HttpServletRequest;
-import java.security.MessageDigest;
-import java.sql.Connection;
 import java.util.function.Function;
-import java.util.function.Supplier;
 
 public class DependencyContainer {
-    private final static HikariDataSource DB_SOURCE;
     private final static ConnectionHolder CONNECTION_HOLDER;
     private final static ThreadLocal<Integer> QUERY_COUNTER;
     private final static ThreadLocal<Long> QUERY_TIMER;
     private final static ThreadLocal<Long> REQUEST_TIMER;
     private final static Function<HttpServletRequest, UnverifiedUser> USERS_FACTORY;
     private final static UsersAuthentication USERS_AUTHENTICATION;
-    private final static Supplier<UsersRating> USERS_RATING;
+    private final static UsersRating USERS_RATING;
     private final static UsersQueue USERS_QUEUE;
     private final static Duels DUELS;
-    private final static Supplier<ActiveDuels> ACTIVE_DUELS;
-    private final static Supplier<FinishedDuels> FINISHED_DUELS;
+    private final static ActiveDuels ACTIVE_DUELS;
+    private final static FinishedDuels FINISHED_DUELS;
 
     static {
         final int turnDuration = 10000;
@@ -48,67 +41,62 @@ public class DependencyContainer {
         QUERY_COUNTER = ThreadLocal.withInitial(() -> 0);
         QUERY_TIMER = ThreadLocal.withInitial(() -> 0L);
         REQUEST_TIMER = ThreadLocal.withInitial(() -> 0L);
-        DB_SOURCE = new DataSourceWrapper(
-                new DBConfig().config(),
-                connection -> new ConnectionHandler(
-                        connection,
-                        statement -> new StatementHandler(
-                                statement,
-                                QUERY_COUNTER,
-                                QUERY_TIMER
-                        )
-                )
-        );
         CONNECTION_HOLDER = new ConnectionHolder(
-                DB_SOURCE,
+                new DataSourceWrapper(
+                        new DBConfig().config(),
+                        connection -> new ConnectionHandler(
+                                connection,
+                                statement -> new StatementHandler(
+                                        statement,
+                                        QUERY_COUNTER,
+                                        QUERY_TIMER
+                                )
+                        )
+                ),
                 new ThreadLocal<>(),
                 ThreadLocal.withInitial(() -> false)
         );
-        final ConnectionFactory connectionFactory = new ConnectionFactory(DB_SOURCE);
-        final Function<Connection, ActiveDuels> activeDuelsFactory =
-                connection -> new ActiveDuels(
-                        () -> connection,
-                        new SimpleDuelistFactory(
-                                turnDuration,
-                                () -> connection
-                        ),
-                        new SimpleDuelFactory(
-                                duelStartDelay,
-                                new AttackLogs(
-                                        () -> connection,
-                                        "attack_log"
-                                )
-                        ),
+        final ActiveDuels activeDuels = new ActiveDuels(
+                CONNECTION_HOLDER,
+                new SimpleDuelistFactory(
+                        turnDuration,
+                        CONNECTION_HOLDER
+                ),
+                new SimpleDuelFactory(
+                        duelStartDelay,
                         new AttackLogs(
-                                () -> connection,
+                                CONNECTION_HOLDER,
                                 "attack_log"
                         )
+                ),
+                new AttackLogs(
+                        CONNECTION_HOLDER,
+                        "attack_log"
+                )
         );
-        final Function<Connection, FinishedDuels> finishedDuelsFactory =
-                connection -> new FinishedDuels(
-                        () -> connection,
-                        new FinalBlows(() -> connection),
-                        new GeneralDuelLog(
-                                new AttackLogs(
-                                        () -> connection,
-                                        "attack_log_history"
-                                ),
-                                new FinalBlows(
-                                        () -> connection
-                                )
+        final FinishedDuels finishedDuels = new FinishedDuels(
+                CONNECTION_HOLDER,
+                new FinalBlows(CONNECTION_HOLDER),
+                new GeneralDuelLog(
+                        new AttackLogs(
+                                CONNECTION_HOLDER,
+                                "attack_log_history"
+                        ),
+                        new FinalBlows(
+                                CONNECTION_HOLDER
                         )
-                );
-        final MessageDigest messageDigest
-                = new MessageDigestFactory(passSalt).messageDigest();
-        USERS_FACTORY = httpRequest -> new UnverifiedUser(httpRequest, messageDigest);
-        USERS_AUTHENTICATION = new UsersAuthentication(
-                () -> new Users(new ConstantConnectionFactory(DB_SOURCE))
+                )
         );
+        USERS_FACTORY = httpRequest -> new UnverifiedUser(
+                httpRequest,
+                new MessageDigestFactory(passSalt).messageDigest()
+        );
+        USERS_AUTHENTICATION = new UsersAuthentication(new Users(CONNECTION_HOLDER));
         DUELS = new Duels(
-                DB_SOURCE,
-                activeDuelsFactory,
-                finishedDuelsFactory,
-                connection -> new Users(() -> connection)
+                CONNECTION_HOLDER,
+                activeDuels,
+                finishedDuels,
+                new Users(CONNECTION_HOLDER)
         );
         USERS_QUEUE = new UsersQueue();
         new Thread(
@@ -118,11 +106,9 @@ public class DependencyContainer {
                         defaultUserName
                 )
         ).start();
-        ACTIVE_DUELS = () -> activeDuelsFactory.apply(connectionFactory.get());
-        FINISHED_DUELS = () -> finishedDuelsFactory.apply(connectionFactory.get());
-        USERS_RATING = () -> new UsersRating(
-                new ConstantConnectionFactory(DB_SOURCE)
-        );
+        ACTIVE_DUELS = activeDuels;
+        FINISHED_DUELS = finishedDuels;
+        USERS_RATING = new UsersRating(CONNECTION_HOLDER);
     }
 
     public static ThreadLocal<Long> requestTimer() {
@@ -145,7 +131,7 @@ public class DependencyContainer {
         return USERS_QUEUE;
     }
 
-    public static Supplier<ActiveDuels> activeDuels() {
+    public static ActiveDuels activeDuels() {
         return ACTIVE_DUELS;
     }
 
@@ -153,11 +139,11 @@ public class DependencyContainer {
         return DUELS;
     }
 
-    public static Supplier<UsersRating> usersRating() {
+    public static UsersRating usersRating() {
         return USERS_RATING;
     }
 
-    public static Supplier<FinishedDuels> finishedDuels() {
+    public static FinishedDuels finishedDuels() {
         return FINISHED_DUELS;
     }
 

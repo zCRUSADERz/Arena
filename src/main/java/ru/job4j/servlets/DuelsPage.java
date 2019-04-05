@@ -11,11 +11,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
-import java.util.function.Supplier;
 
 public class DuelsPage extends HttpServlet {
     private UsersQueue queue;
-    private Supplier<UsersRating> usersRatingFactory;
+    private UsersRating usersRating;
 
     @Override
     public final void doGet(final HttpServletRequest req,
@@ -26,12 +25,8 @@ public class DuelsPage extends HttpServlet {
         if (!waitingFight) {
             HttpSession session = req.getSession();
             final String userName = (String) session.getAttribute("userName");
-            try (final UsersRating usersRating = this.usersRatingFactory.get()) {
-                final UserRating rating = usersRating.rating(userName);
-                req.setAttribute("rating", rating);
-            } catch (final Exception ex) {
-                throw new ServletException(ex);
-            }
+            final UserRating rating = this.usersRating.rating(userName);
+            req.setAttribute("rating", rating);
         }
         req.getRequestDispatcher("/WEB-INF/views/Duels.jsp")
                 .forward(req, resp);
@@ -62,6 +57,6 @@ public class DuelsPage extends HttpServlet {
     public final void init() throws ServletException {
         super.init();
         this.queue = DependencyContainer.usersQueue();
-        this.usersRatingFactory = DependencyContainer.usersRating();
+        this.usersRating = DependencyContainer.usersRating();
     }
 }

@@ -4,7 +4,6 @@ import ru.job4j.domain.duels.activity.LastActivity;
 import ru.job4j.domain.duels.conditions.AttackCondition;
 
 public class ConstantDuelist extends DuelistInfo implements Duelist  {
-
     private final AttackCondition attackCondition;
     private final LastActivity lastActivity;
 

@@ -1,18 +1,18 @@
 package ru.job4j.domain.duels.activity;
 
-import java.sql.Connection;
+import ru.job4j.db.ConnectionHolder;
+
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.function.Supplier;
 
-public class DBLastActivity implements Activity, AutoCloseable {
+public class DBLastActivity implements Activity {
     private final String userName;
-    private final Supplier<Connection> connectionFactory;
+    private final ConnectionHolder connectionHolder;
 
-    public DBLastActivity(final String userName, final Supplier<Connection> connectionFactory) {
+    public DBLastActivity(final String userName, final ConnectionHolder connectionHolder) {
         this.userName = userName;
-        this.connectionFactory = connectionFactory;
+        this.connectionHolder = connectionHolder;
     }
 
     @Override
@@ -22,7 +22,7 @@ public class DBLastActivity implements Activity, AutoCloseable {
                 + "SELECT last_activity FROM active_duelists "
                 + "WHERE user_name = ?";
         try (final PreparedStatement statement
-                     = this.connectionFactory.get().prepareStatement(query)) {
+                     = this.connectionHolder.connection().prepareStatement(query)) {
             statement.setString(1, this.userName);
             try (final ResultSet resultSet = statement.executeQuery()) {
                 if (resultSet.next()) {
@@ -49,7 +49,7 @@ public class DBLastActivity implements Activity, AutoCloseable {
                 + "SET last_activity = CURRENT_TIMESTAMP(3) + ? "
                 + "WHERE user_name = ?";
         try (final PreparedStatement statement
-                     = this.connectionFactory.get().prepareStatement(query)) {
+                     = this.connectionHolder.connection().prepareStatement(query)) {
             statement.setDouble(1, delay);
             statement.setString(2, this.userName);
             if (statement.executeUpdate() != 1) {
@@ -61,10 +61,5 @@ public class DBLastActivity implements Activity, AutoCloseable {
         } catch (final SQLException ex) {
             throw new IllegalStateException(ex);
         }
-    }
-
-    @Override
-    public void close() throws Exception {
-        this.connectionFactory.get().close();
     }
 }

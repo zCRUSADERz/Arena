@@ -1,23 +1,22 @@
 package ru.job4j.domain.duels.logs;
 
+import ru.job4j.db.ConnectionHolder;
 import ru.job4j.domain.duels.factories.LogsFactory;
 
-import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.function.Supplier;
 
-public class AttackLogs implements LogsFactory, AutoCloseable {
-    private final Supplier<Connection> connectionFactory;
+public class AttackLogs implements LogsFactory {
+    private final ConnectionHolder connectionHolder;
     private final String logTable;
 
-    public AttackLogs(final Supplier<Connection> connectionFactory,
+    public AttackLogs(final ConnectionHolder connectionHolder,
                       final String logTable) {
-        this.connectionFactory = connectionFactory;
+        this.connectionHolder = connectionHolder;
         this.logTable = logTable;
     }
 
@@ -29,7 +28,8 @@ public class AttackLogs implements LogsFactory, AutoCloseable {
                 this.logTable
         );
         final Collection<AttackLog> result;
-        try (PreparedStatement statement = this.connectionFactory.get().prepareStatement(query)) {
+        try (PreparedStatement statement
+                     = this.connectionHolder.connection().prepareStatement(query)) {
             statement.setInt(1, duelId);
             try (final ResultSet resultSet = statement.executeQuery()) {
                 if (resultSet.next()) {
@@ -59,7 +59,8 @@ public class AttackLogs implements LogsFactory, AutoCloseable {
                 + "VALUES (?, ?, ?, ?)",
                 this.logTable
         );
-        try (final PreparedStatement statement = this.connectionFactory.get().prepareStatement(query)) {
+        try (final PreparedStatement statement
+                     = this.connectionHolder.connection().prepareStatement(query)) {
             statement.setString(1, attackerName);
             statement.setInt(2, duelId);
             statement.setString(3, targetName);
@@ -74,10 +75,5 @@ public class AttackLogs implements LogsFactory, AutoCloseable {
         } catch (final SQLException ex) {
             throw new IllegalStateException(ex);
         }
-    }
-
-    @Override
-    public void close() throws Exception {
-        this.connectionFactory.get().close();
     }
 }

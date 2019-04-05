@@ -1,5 +1,6 @@
 package ru.job4j.domain.duels;
 
+import ru.job4j.db.ConnectionHolder;
 import ru.job4j.domain.duels.duelists.PairOfDuelist;
 import ru.job4j.domain.duels.factories.DuelFactory;
 import ru.job4j.domain.duels.factories.DuelistFactory;
@@ -7,10 +8,11 @@ import ru.job4j.domain.duels.factories.LogsFactory;
 import ru.job4j.domain.duels.logs.results.DuelAttackResult;
 import ru.job4j.domain.duels.logs.results.SimpleDuelAttackResult;
 
-import java.sql.*;
-import java.util.function.Supplier;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
-public class ActiveDuels implements AutoCloseable {
+public class ActiveDuels {
     private final static String DUEL_SELECT = ""
             + "SELECT ad1.user_name, ad1.last_activity, ad1.health, ad1.damage, "
             + "d.duel_id, d.created, CURRENT_TIMESTAMP() AS now, "
@@ -20,16 +22,16 @@ public class ActiveDuels implements AutoCloseable {
             + "ON ad1.duel_id = d.duel_id AND ad1.user_name = ? "
             + "JOIN active_duelists AS ad2 "
             + "ON ad2.duel_id = d.duel_id AND ad2.user_name != ?";
-    private final Supplier<Connection> connectionFactory;
+    private final ConnectionHolder connectionHolder;
     private final DuelistFactory duelistFactory;
     private final DuelFactory duelFactory;
     private final LogsFactory logsFactory;
 
-    public ActiveDuels(final Supplier<Connection> connectionFactory,
+    public ActiveDuels(final ConnectionHolder connectionHolder,
                        final DuelistFactory duelistFactory,
                        final DuelFactory duelFactory,
                        final LogsFactory logsFactory) {
-        this.connectionFactory = connectionFactory;
+        this.connectionHolder = connectionHolder;
         this.duelistFactory = duelistFactory;
         this.duelFactory = duelFactory;
         this.logsFactory = logsFactory;
@@ -39,7 +41,7 @@ public class ActiveDuels implements AutoCloseable {
     public final Duel duel(final String userName) {
         final Duel result;
         try (final PreparedStatement statement
-                     = this.connectionFactory.get().prepareStatement(DUEL_SELECT)) {
+                     = this.connectionHolder.connection().prepareStatement(DUEL_SELECT)) {
             statement.setString(1, userName);
             statement.setString(2, userName);
             try (final ResultSet resultSet = statement.executeQuery()) {
@@ -80,7 +82,7 @@ public class ActiveDuels implements AutoCloseable {
     public final DuelAttackResult turn(final String userName) {
         final DBDuel duel;
         try (final PreparedStatement statement
-                     = this.connectionFactory.get().prepareStatement(DUEL_SELECT)) {
+                     = this.connectionHolder.connection().prepareStatement(DUEL_SELECT)) {
             statement.setString(1, userName);
             statement.setString(2, userName);
             try (final ResultSet resultSet = statement.executeQuery()) {
@@ -125,7 +127,7 @@ public class ActiveDuels implements AutoCloseable {
                 + "WHERE user_name = ?";
         final boolean result;
         try (final PreparedStatement statement
-                     = this.connectionFactory.get().prepareStatement(query)) {
+                     = this.connectionHolder.connection().prepareStatement(query)) {
             statement.setString(1, userName);
             try (final ResultSet resultSet = statement.executeQuery()) {
                 result = resultSet.next();
@@ -134,10 +136,5 @@ public class ActiveDuels implements AutoCloseable {
             throw new IllegalStateException(ex);
         }
         return result;
-    }
-
-    @Override
-    public void close() throws Exception {
-        this.connectionFactory.get().close();
     }
 }

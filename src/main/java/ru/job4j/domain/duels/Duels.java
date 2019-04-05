@@ -1,31 +1,31 @@
 package ru.job4j.domain.duels;
 
+import ru.job4j.db.ConnectionHolder;
 import ru.job4j.domain.Users;
 import ru.job4j.domain.duels.logs.results.DuelAttackResult;
 
-import javax.sql.DataSource;
 import java.sql.*;
-import java.util.function.Function;
 
 public class Duels {
-    private final DataSource dataSource;
-    private final Function<Connection, ActiveDuels> activeDuelsFactory;
-    private final Function<Connection, FinishedDuels> finishedDuelsFactory;
-    private final Function<Connection, Users> usersFactory;
+    private final ConnectionHolder connectionHolder;
+    private final ActiveDuels activeDuels;
+    private final FinishedDuels finishedDuels;
+    private final Users users;
 
-    public Duels(final DataSource dataSource,
-                 final Function<Connection, ActiveDuels> activeDuelsFactory,
-                 final Function<Connection, FinishedDuels> finishedDuelsFactory,
-                 final Function<Connection, Users> usersFactory) {
-        this.dataSource = dataSource;
-        this.activeDuelsFactory = activeDuelsFactory;
-        this.finishedDuelsFactory = finishedDuelsFactory;
-        this.usersFactory = usersFactory;
+    public Duels(final ConnectionHolder connectionHolder,
+                 final ActiveDuels activeDuels,
+                 final FinishedDuels finishedDuels,
+                 final Users users) {
+        this.connectionHolder = connectionHolder;
+        this.activeDuels = activeDuels;
+        this.finishedDuels = finishedDuels;
+        this.users = users;
     }
 
     public final void create(final String first, final String second)
             throws RuntimeException {
-        try (final Connection conn = this.dataSource.getConnection()) {
+        try {
+            final Connection conn = this.connectionHolder.connection();
             conn.setAutoCommit(false);
             final int duel_id;
             try {
@@ -61,20 +61,16 @@ public class Duels {
 
     public final DuelAttackResult turn(final String userName) {
         final DuelAttackResult result;
-        try (final Connection conn = this.dataSource.getConnection()) {
+        try {
+            final Connection conn = this.connectionHolder.connection();
             conn.setAutoCommit(false);
             final int defaultTransactionIsolation = conn.getTransactionIsolation();
             conn.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
             try {
-                result = this.activeDuelsFactory
-                        .apply(conn)
-                        .turn(userName);
+                result = this.activeDuels.turn(userName);
                 if (result.killed()) {
-                    this.finishedDuelsFactory
-                            .apply(conn)
-                            .create(result);
-                    final Users users = this.usersFactory.apply(conn);
-                    users.upgrade(result);
+                    this.finishedDuels.create(result);
+                    this.users.upgrade(result);
                 }
             } catch (final Exception ex) {
                 conn.rollback();

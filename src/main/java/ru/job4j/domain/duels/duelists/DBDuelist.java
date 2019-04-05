@@ -1,33 +1,32 @@
 package ru.job4j.domain.duels.duelists;
 
+import ru.job4j.db.ConnectionHolder;
 import ru.job4j.domain.duels.activity.Activity;
 import ru.job4j.domain.duels.conditions.AttackCondition;
 import ru.job4j.domain.duels.logs.results.AttackResult;
 import ru.job4j.domain.duels.logs.results.SimpleAttackResult;
 
-import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.util.function.Supplier;
 
-public class DBDuelist implements SimpleDuelist, AutoCloseable {
+public class DBDuelist implements SimpleDuelist {
     private final String userName;
     private final int damage;
     private final int health;
     private final Activity lastActivity;
     private final AttackCondition attackCondition;
-    private final Supplier<Connection> connectionFactory;
+    private final ConnectionHolder connectionHolder;
 
     public DBDuelist(final String userName, final int damage, final int health,
                      final Activity lastActivity,
                      final AttackCondition attackCondition,
-                     final Supplier<Connection> connectionFactory) {
+                     final ConnectionHolder connectionHolder) {
         this.userName = userName;
         this.damage = damage;
         this.health = health;
         this.lastActivity = lastActivity;
         this.attackCondition = attackCondition;
-        this.connectionFactory = connectionFactory;
+        this.connectionHolder = connectionHolder;
     }
 
     @Override
@@ -72,7 +71,7 @@ public class DBDuelist implements SimpleDuelist, AutoCloseable {
                 + "SET health = ? "
                 + "WHERE user_name = ?";
         try (final PreparedStatement statement
-                     = this.connectionFactory.get().prepareStatement(attackQuery)) {
+                     = this.connectionHolder.connection().prepareStatement(attackQuery)) {
             statement.setInt(1, newTargetHealth);
             statement.setString(2, target.userName);
             if (statement.executeUpdate() != 1) {
@@ -85,10 +84,5 @@ public class DBDuelist implements SimpleDuelist, AutoCloseable {
             throw new IllegalStateException(ex);
         }
         return result;
-    }
-
-    @Override
-    public final void close() throws Exception {
-        this.connectionFactory.get().close();
     }
 }

@@ -1,28 +1,27 @@
 package ru.job4j.domain;
 
+import ru.job4j.db.ConnectionHolder;
 import ru.job4j.domain.duels.logs.results.AttackResult;
 
-import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.Supplier;
 
-public class Users implements AutoCloseable {
-    private final Supplier<Connection> connectionFactory;
+public class Users {
+    private final ConnectionHolder connectionHolder;
 
-    public Users(final Supplier<Connection> connectionFactory) {
-        this.connectionFactory = connectionFactory;
+    public Users(final ConnectionHolder connectionHolder) {
+        this.connectionHolder = connectionHolder;
     }
 
     public final Optional<User> user(final String name) {
         final Optional<User> result;
         final String select = "SELECT name, password FROM users WHERE name = ?";
         try (final PreparedStatement statement
-                     = this.connectionFactory.get().prepareStatement(select)) {
+                     = this.connectionHolder.connection().prepareStatement(select)) {
             statement.setString(1, name);
             try (final ResultSet resultSet = statement.executeQuery()) {
                 if (resultSet.next()) {
@@ -45,7 +44,7 @@ public class Users implements AutoCloseable {
         final Map<String, String> errors;
         final String insert = "INSERT INTO users (name, password) VALUES (?, ?)";
         try (final PreparedStatement statement
-                     = this.connectionFactory.get().prepareStatement(insert)) {
+                     = this.connectionHolder.connection().prepareStatement(insert)) {
             statement.setString(1, user.name());
             statement.setBytes(2, user.password());
             final int rows = statement.executeUpdate();
@@ -65,18 +64,13 @@ public class Users implements AutoCloseable {
         this.upgrade(attackResult.target(), -1);
     }
 
-    @Override
-    public final void close() throws Exception {
-        this.connectionFactory.get().close();
-    }
-
     private void upgrade(final String userName, final int rating) {
         final String upgrade = ""
                 + "UPDATE users  "
                 + "SET health = health + 1, damage = damage + 1, rating = rating + ? "
                 + "WHERE name = ?";
         try (final PreparedStatement statement
-                     = this.connectionFactory.get().prepareStatement(upgrade)) {
+                     = this.connectionHolder.connection().prepareStatement(upgrade)) {
             statement.setInt(1, rating);
             statement.setString(2, userName);
             if (statement.executeUpdate() != 1) {

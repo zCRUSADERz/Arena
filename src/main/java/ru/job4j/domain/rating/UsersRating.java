@@ -1,16 +1,16 @@
 package ru.job4j.domain.rating;
 
-import java.sql.Connection;
+import ru.job4j.db.ConnectionHolder;
+
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.function.Supplier;
 
-public class UsersRating implements AutoCloseable {
-    private final Supplier<Connection> connectionFactory;
+public class UsersRating {
+    private final ConnectionHolder connectionHolder;
 
-    public UsersRating(final Supplier<Connection> connectionFactory) {
-        this.connectionFactory = connectionFactory;
+    public UsersRating(final ConnectionHolder connectionHolder) {
+        this.connectionHolder = connectionHolder;
     }
 
     public final UserRating rating(final String userName) {
@@ -23,7 +23,7 @@ public class UsersRating implements AutoCloseable {
                 + "WHERE target_name = ?) AS defeat "
                 + "FROM users WHERE name = ?";
         try (final PreparedStatement statement
-                     = this.connectionFactory.get().prepareStatement(query)) {
+                     = this.connectionHolder.connection().prepareStatement(query)) {
             statement.setString(1, userName);
             statement.setString(2, userName);
             statement.setString(3, userName);
@@ -45,10 +45,5 @@ public class UsersRating implements AutoCloseable {
             throw new IllegalStateException(ex);
         }
         return result;
-    }
-
-    @Override
-    public void close() throws Exception {
-        this.connectionFactory.get().close();
     }
 }

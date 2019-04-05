@@ -1,5 +1,6 @@
 package ru.job4j.domain.duels.factories;
 
+import ru.job4j.db.ConnectionHolder;
 import ru.job4j.domain.duels.activity.ConstantLastActivity;
 import ru.job4j.domain.duels.activity.DBLastActivity;
 import ru.job4j.domain.duels.activity.LastActivityWrapper;
@@ -8,19 +9,17 @@ import ru.job4j.domain.duels.duelists.ConstantDuelist;
 import ru.job4j.domain.duels.duelists.DBDuelist;
 import ru.job4j.domain.duels.duelists.Duelist;
 
-import java.sql.Connection;
 import java.sql.Timestamp;
 import java.util.TimeZone;
-import java.util.function.Supplier;
 
-public class SimpleDuelistFactory implements DuelistFactory, AutoCloseable {
+public class SimpleDuelistFactory implements DuelistFactory {
     private final int turnDuration;
-    private final Supplier<Connection> connectionFactory;
+    private final ConnectionHolder connectionHolder;
 
     public SimpleDuelistFactory(final int turnDuration,
-                                final Supplier<Connection> connectionFactory) {
+                                final ConnectionHolder connectionHolder) {
         this.turnDuration = turnDuration;
-        this.connectionFactory = connectionFactory;
+        this.connectionHolder = connectionHolder;
     }
 
     @Override
@@ -50,19 +49,14 @@ public class SimpleDuelistFactory implements DuelistFactory, AutoCloseable {
                         new ConstantLastActivity(lastActivity),
                         new DBLastActivity(
                                 userName,
-                                this.connectionFactory
+                                this.connectionHolder
                         )
                 ),
                 new AttackConditionOnTimer(
                         this.turnDuration,
                         now::getTime
                 ),
-                this.connectionFactory
+                this.connectionHolder
         );
-    }
-
-    @Override
-    public final void close() throws Exception {
-        this.connectionFactory.get().close();
     }
 }

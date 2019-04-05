@@ -1,26 +1,25 @@
 package ru.job4j.domain.duels;
 
+import ru.job4j.db.ConnectionHolder;
 import ru.job4j.domain.duels.duelists.DuelistInfo;
 import ru.job4j.domain.duels.duelists.PairOfDuelist;
 import ru.job4j.domain.duels.factories.LogsFactory;
 import ru.job4j.domain.duels.logs.FinalBlows;
 import ru.job4j.domain.duels.logs.results.DuelAttackResult;
 
-import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.function.Supplier;
 
-public class FinishedDuels implements AutoCloseable {
-    private final Supplier<Connection> connectionFactory;
+public class FinishedDuels {
+    private final ConnectionHolder connectionHolder;
     private final FinalBlows finalBlows;
     private final LogsFactory logsFactory;
 
-    public FinishedDuels(final Supplier<Connection> connectionFactory,
+    public FinishedDuels(final ConnectionHolder connectionHolder,
                          final FinalBlows finalBlows,
                          final LogsFactory logsFactory) {
-        this.connectionFactory = connectionFactory;
+        this.connectionHolder = connectionHolder;
         this.finalBlows = finalBlows;
         this.logsFactory = logsFactory;
     }
@@ -39,7 +38,8 @@ public class FinishedDuels implements AutoCloseable {
                 + "ON ad2.duel_id = d.duel_id AND ad2.user_name != ? "
                 + "ORDER BY d.finished DESC "
                 + "LIMIT 1";
-        try (final PreparedStatement statement = this.connectionFactory.get().prepareStatement(query)) {
+        try (final PreparedStatement statement
+                     = this.connectionHolder.connection().prepareStatement(query)) {
             statement.setString(1, userName);
             statement.setString(2, userName);
             try (final ResultSet resultSet = statement.executeQuery()) {
@@ -78,7 +78,8 @@ public class FinishedDuels implements AutoCloseable {
             final String copyDuel = ""
                     + "INSERT INTO duels_history (duel_id, created) "
                     + "SELECT duel_id, created FROM active_duels WHERE duel_id = ?";
-            try (final PreparedStatement statement = this.connectionFactory.get().prepareStatement(copyDuel)) {
+            try (final PreparedStatement statement
+                         = this.connectionHolder.connection().prepareStatement(copyDuel)) {
                 statement.setInt(1, attackResult.duelID());
                 if (statement.executeUpdate() != 1) {
                     throw new IllegalStateException(String.format(
@@ -92,7 +93,8 @@ public class FinishedDuels implements AutoCloseable {
                     + "(user_name, duel_id, start_health, health, damage) "
                     + "SELECT user_name, duel_id, start_health, health, damage "
                     + "FROM active_duelists WHERE duel_id = ?";
-            try (final PreparedStatement statement = this.connectionFactory.get().prepareStatement(copyDuelists)) {
+            try (final PreparedStatement statement
+                         = this.connectionHolder.connection().prepareStatement(copyDuelists)) {
                 statement.setInt(1, attackResult.duelID());
                 if (statement.executeUpdate() != 2) {
                     throw new IllegalStateException(String.format(
@@ -106,7 +108,8 @@ public class FinishedDuels implements AutoCloseable {
                     + "         (attacker_name, time, duel_id, target_name, damage) "
                     + "SELECT attacker_name, time, duel_id, target_name, damage "
                     + "FROM attack_log WHERE duel_id = ?";
-            try (final PreparedStatement statement = this.connectionFactory.get().prepareStatement(copyLogs)) {
+            try (final PreparedStatement statement
+                         = this.connectionHolder.connection().prepareStatement(copyLogs)) {
                 statement.setInt(1, attackResult.duelID());
                 if (statement.executeUpdate() < 1) {
                     throw new IllegalStateException(String.format(
@@ -118,7 +121,8 @@ public class FinishedDuels implements AutoCloseable {
             this.finalBlows.create(attackResult);
             final String deleteActiveDuel = ""
                     + "DELETE FROM active_duels WHERE duel_id = ?";
-            try (final PreparedStatement statement = this.connectionFactory.get().prepareStatement(deleteActiveDuel)) {
+            try (final PreparedStatement statement
+                         = this.connectionHolder.connection().prepareStatement(deleteActiveDuel)) {
                 statement.setInt(1, attackResult.duelID());
                 if (statement.executeUpdate() != 1) {
                     throw new IllegalStateException(String.format(
@@ -130,10 +134,5 @@ public class FinishedDuels implements AutoCloseable {
         } catch (final SQLException ex) {
             throw new IllegalStateException(ex);
         }
-    }
-
-    @Override
-    public void close() throws Exception {
-        this.connectionFactory.get().close();
     }
 }

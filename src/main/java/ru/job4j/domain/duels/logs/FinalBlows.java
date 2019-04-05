@@ -1,18 +1,17 @@
 package ru.job4j.domain.duels.logs;
 
+import ru.job4j.db.ConnectionHolder;
 import ru.job4j.domain.duels.logs.results.DuelAttackResult;
 
-import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.function.Supplier;
 
-public class FinalBlows implements AutoCloseable {
-    private final Supplier<Connection> connectionFactory;
+public class FinalBlows {
+    private final ConnectionHolder connectionHolder;
 
-    public FinalBlows(final Supplier<Connection> connectionFactory) {
-        this.connectionFactory = connectionFactory;
+    public FinalBlows(final ConnectionHolder connectionHolder) {
+        this.connectionHolder = connectionHolder;
     }
 
     public final AttackLog finalBlow(final int duelID) {
@@ -20,7 +19,8 @@ public class FinalBlows implements AutoCloseable {
         final String insertQuery = ""
                 + "SELECT attacker_name, target_name "
                 + "FROM final_blow WHERE duel_id = ?";
-        try (final PreparedStatement statement = this.connectionFactory.get().prepareStatement(insertQuery)) {
+        try (final PreparedStatement statement
+                     = this.connectionHolder.connection().prepareStatement(insertQuery)) {
             statement.setInt(1, duelID);
             try (final ResultSet resultSet = statement.executeQuery()) {
                 if (resultSet.next()) {
@@ -51,7 +51,8 @@ public class FinalBlows implements AutoCloseable {
         final String insertQuery = ""
                 + "INSERT INTO final_blow (attacker_name, duel_id, target_name) "
                 + "VALUE (?, ?, ?)";
-        try (final PreparedStatement statement = this.connectionFactory.get().prepareStatement(insertQuery)) {
+        try (final PreparedStatement statement
+                     = this.connectionHolder.connection().prepareStatement(insertQuery)) {
             statement.setString(1, attackResult.attacker());
             statement.setInt(2, attackResult.duelID());
             statement.setString(3, attackResult.target());
@@ -64,10 +65,5 @@ public class FinalBlows implements AutoCloseable {
         } catch (final SQLException ex) {
             throw new IllegalStateException(ex);
         }
-    }
-
-    @Override
-    public void close() throws Exception {
-        this.connectionFactory.get().close();
     }
 }
