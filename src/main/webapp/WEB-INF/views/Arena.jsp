@@ -1,4 +1,5 @@
-<%@ page contentType="text/html;charset=UTF-8" %>
+<jsp:directive.page contentType="text/html; charset=UTF-8" />
+<jsp:directive.page pageEncoding="UTF-8" />
 <html>
 <head>
     <title>Arena</title>

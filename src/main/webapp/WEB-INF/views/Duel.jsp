@@ -1,6 +1,7 @@
 <%@ page import="ru.job4j.domain.duels.duelists.Duelist" %>
-<%@ page contentType="text/html;charset=UTF-8"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<jsp:directive.page contentType="text/html; charset=UTF-8" />
+<jsp:directive.page pageEncoding="UTF-8" />
 <html>
 <head>
     <title>Дуэль</title>
