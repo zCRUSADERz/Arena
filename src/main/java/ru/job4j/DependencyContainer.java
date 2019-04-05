@@ -1,10 +1,7 @@
 package ru.job4j;
 
 import com.zaxxer.hikari.HikariDataSource;
-import ru.job4j.db.ConnectionHandler;
-import ru.job4j.db.DBConfig;
-import ru.job4j.db.DataSourceWrapper;
-import ru.job4j.db.StatementHandler;
+import ru.job4j.db.*;
 import ru.job4j.db.factories.ConnectionFactory;
 import ru.job4j.db.factories.ConstantConnectionFactory;
 import ru.job4j.domain.MessageDigestFactory;
@@ -31,6 +28,7 @@ import java.util.function.Supplier;
 
 public class DependencyContainer {
     private final static HikariDataSource DB_SOURCE;
+    private final static ConnectionHolder CONNECTION_HOLDER;
     private final static ThreadLocal<Integer> QUERY_COUNTER;
     private final static ThreadLocal<Long> QUERY_TIMER;
     private final static ThreadLocal<Long> REQUEST_TIMER;
@@ -60,6 +58,11 @@ public class DependencyContainer {
                                 QUERY_TIMER
                         )
                 )
+        );
+        CONNECTION_HOLDER = new ConnectionHolder(
+                DB_SOURCE,
+                new ThreadLocal<>(),
+                ThreadLocal.withInitial(() -> false)
         );
         final ConnectionFactory connectionFactory = new ConnectionFactory(DB_SOURCE);
         final Function<Connection, ActiveDuels> activeDuelsFactory =
@@ -160,5 +163,9 @@ public class DependencyContainer {
 
     public static Function<HttpServletRequest, UnverifiedUser> usersFactory() {
         return USERS_FACTORY;
+    }
+
+    public static ConnectionHolder connectionHolder() {
+        return CONNECTION_HOLDER;
     }
 }
