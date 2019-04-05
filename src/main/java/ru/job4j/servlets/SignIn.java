@@ -1,8 +1,8 @@
 package ru.job4j.servlets;
 
 import ru.job4j.DependencyContainer;
-import ru.job4j.domain.UnverifiedUser;
-import ru.job4j.domain.UsersAuthentication;
+import ru.job4j.domain.users.UnverifiedUser;
+import ru.job4j.domain.users.UsersAuthentication;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;

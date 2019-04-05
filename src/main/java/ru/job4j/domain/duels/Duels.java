@@ -1,8 +1,8 @@
 package ru.job4j.domain.duels;
 
 import ru.job4j.db.ConnectionHolder;
-import ru.job4j.domain.Users;
 import ru.job4j.domain.duels.logs.results.DuelAttackResult;
+import ru.job4j.domain.users.User;
 
 import java.sql.*;
 
@@ -10,16 +10,13 @@ public class Duels {
     private final ConnectionHolder connectionHolder;
     private final ActiveDuels activeDuels;
     private final FinishedDuels finishedDuels;
-    private final Users users;
 
     public Duels(final ConnectionHolder connectionHolder,
                  final ActiveDuels activeDuels,
-                 final FinishedDuels finishedDuels,
-                 final Users users) {
+                 final FinishedDuels finishedDuels) {
         this.connectionHolder = connectionHolder;
         this.activeDuels = activeDuels;
         this.finishedDuels = finishedDuels;
-        this.users = users;
     }
 
     public final void create(final String first, final String second)
@@ -70,7 +67,10 @@ public class Duels {
                 result = this.activeDuels.turn(userName);
                 if (result.killed()) {
                     this.finishedDuels.create(result);
-                    this.users.upgrade(result);
+                    new User(result.attacker(), this.connectionHolder)
+                            .upgrade(result);
+                    new User(result.target(), this.connectionHolder)
+                            .upgrade(result);
                 }
             } catch (final Exception ex) {
                 conn.rollback();

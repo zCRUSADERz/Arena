@@ -1,5 +1,6 @@
-package ru.job4j.domain;
+package ru.job4j.domain.users;
 
+import org.cactoos.Scalar;
 import org.cactoos.scalar.StickyScalar;
 import org.cactoos.scalar.UncheckedScalar;
 
@@ -9,7 +10,7 @@ import java.security.MessageDigest;
 import java.util.HashMap;
 import java.util.Map;
 
-public class UnverifiedUser implements User {
+public class UnverifiedUser implements UserCredentials {
     private final HttpServletRequest request;
     private final UncheckedScalar<Map<String, String>> validateErrors;
     private final MessageDigest messageDigest;
@@ -18,9 +19,7 @@ public class UnverifiedUser implements User {
                           final MessageDigest messageDigest) {
         this.request = request;
         this.validateErrors = new UncheckedScalar<>(
-                new StickyScalar<>(
-                        () -> new RequestUser(request).validate()
-                )
+                new StickyScalar<>(new ValidateErrors(request))
         );
         this.messageDigest = messageDigest;
     }
@@ -48,18 +47,20 @@ public class UnverifiedUser implements User {
         return this.validateErrors.value().isEmpty();
     }
 
-    public final Map<String, String> validateErrors() {
+    public final Map<String, String> validate() {
         return this.validateErrors.value();
     }
 
-    public static class RequestUser {
+    public final static class ValidateErrors
+            implements Scalar<Map<String, String>> {
         private final HttpServletRequest request;
 
-        public RequestUser(final HttpServletRequest request) {
+        private ValidateErrors(final HttpServletRequest request) {
             this.request = request;
         }
 
-        public final Map<String, String> validate() {
+        @Override
+        public final Map<String, String> value() {
             final Map<String, String> errors = new HashMap<>();
             final Map<String, String[]> parameters = request.getParameterMap();
             if (parameters.containsKey("name")) {

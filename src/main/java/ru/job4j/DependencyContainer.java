@@ -1,10 +1,6 @@
 package ru.job4j;
 
 import ru.job4j.db.*;
-import ru.job4j.domain.MessageDigestFactory;
-import ru.job4j.domain.UnverifiedUser;
-import ru.job4j.domain.Users;
-import ru.job4j.domain.UsersAuthentication;
 import ru.job4j.domain.duels.ActiveDuels;
 import ru.job4j.domain.duels.Duels;
 import ru.job4j.domain.duels.FinishedDuels;
@@ -16,6 +12,10 @@ import ru.job4j.domain.duels.logs.GeneralDuelLog;
 import ru.job4j.domain.queue.UsersQueue;
 import ru.job4j.domain.queue.UsersQueueConsumer;
 import ru.job4j.domain.rating.UserRating;
+import ru.job4j.domain.users.MessageDigestFactory;
+import ru.job4j.domain.users.UnverifiedUser;
+import ru.job4j.domain.users.Users;
+import ru.job4j.domain.users.UsersAuthentication;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.function.Function;
@@ -95,8 +95,7 @@ public class DependencyContainer {
         DUELS = new Duels(
                 CONNECTION_HOLDER,
                 activeDuels,
-                finishedDuels,
-                new Users(CONNECTION_HOLDER)
+                finishedDuels
         );
         USERS_QUEUE = new UsersQueue();
         new Thread(
