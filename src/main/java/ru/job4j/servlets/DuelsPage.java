@@ -3,7 +3,6 @@ package ru.job4j.servlets;
 import ru.job4j.DependencyContainer;
 import ru.job4j.domain.queue.UsersQueue;
 import ru.job4j.domain.rating.UserRating;
-import ru.job4j.domain.rating.UsersRating;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -11,10 +10,11 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
+import java.util.function.Function;
 
 public class DuelsPage extends HttpServlet {
     private UsersQueue queue;
-    private UsersRating usersRating;
+    private Function<String, UserRating> userRatingFactory;
 
     @Override
     public final void doGet(final HttpServletRequest req,
@@ -25,8 +25,10 @@ public class DuelsPage extends HttpServlet {
         if (!waitingFight) {
             HttpSession session = req.getSession();
             final String userName = (String) session.getAttribute("userName");
-            final UserRating rating = this.usersRating.rating(userName);
-            req.setAttribute("rating", rating);
+            req.setAttribute(
+                    "ratingAttr",
+                    this.userRatingFactory.apply(userName).attributes()
+            );
         }
         req.getRequestDispatcher("/WEB-INF/views/Duels.jsp")
                 .forward(req, resp);
@@ -57,6 +59,6 @@ public class DuelsPage extends HttpServlet {
     public final void init() throws ServletException {
         super.init();
         this.queue = DependencyContainer.usersQueue();
-        this.usersRating = DependencyContainer.usersRating();
+        this.userRatingFactory = DependencyContainer.usersRating();
     }
 }

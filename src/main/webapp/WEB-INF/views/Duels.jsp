@@ -1,4 +1,3 @@
-<%@ page import="ru.job4j.domain.rating.UserRating" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <jsp:directive.page contentType="text/html; charset=UTF-8" />
 <jsp:directive.page pageEncoding="UTF-8" />
@@ -24,19 +23,19 @@
             <input type="submit" value="Выйти" align="center">
         </form>
     </c:when>
-    <c:otherwise>
+    <c:otherwise><%--@elvariable id="ratingAttr" type="java.util.Map<String,String>"--%>
         <table align="center">
             <tr>
                 <td>Рейтинг</td>
-                <td><%= ((UserRating) request.getAttribute("rating")).rating() %></td>
+                <td>${ratingAttr.rating}</td>
             </tr>
             <tr>
                 <td>Побед</td>
-                <td><%= ((UserRating) request.getAttribute("rating")).victories() %></td>
+                <td>${ratingAttr.rating}</td>
             </tr>
             <tr>
                 <td>Поражений</td>
-                <td><%= ((UserRating) request.getAttribute("rating")).defeat() %></td>
+                <td>${ratingAttr.rating}</td>
             </tr>
         </table>
         <form action="${requestScope.contextPath}/arena/duels" method="post">

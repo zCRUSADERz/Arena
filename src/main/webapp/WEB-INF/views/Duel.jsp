@@ -8,6 +8,9 @@
     <c:if test="${not empty requestScope.timer}">
         <meta http-equiv="refresh" content="${requestScope.timer}">
     </c:if>
+    <c:if test="${not requestScope.canAttack}" >
+        <meta http-equiv="refresh" content="10">
+    </c:if>
     <style type="text/css">
         form { text-align: center}
     </style>

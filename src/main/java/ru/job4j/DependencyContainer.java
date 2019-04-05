@@ -15,7 +15,7 @@ import ru.job4j.domain.duels.logs.FinalBlows;
 import ru.job4j.domain.duels.logs.GeneralDuelLog;
 import ru.job4j.domain.queue.UsersQueue;
 import ru.job4j.domain.queue.UsersQueueConsumer;
-import ru.job4j.domain.rating.UsersRating;
+import ru.job4j.domain.rating.UserRating;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.function.Function;
@@ -27,7 +27,7 @@ public class DependencyContainer {
     private final static ThreadLocal<Long> REQUEST_TIMER;
     private final static Function<HttpServletRequest, UnverifiedUser> USERS_FACTORY;
     private final static UsersAuthentication USERS_AUTHENTICATION;
-    private final static UsersRating USERS_RATING;
+    private final static Function<String, UserRating> USERS_RATING;
     private final static UsersQueue USERS_QUEUE;
     private final static Duels DUELS;
     private final static ActiveDuels ACTIVE_DUELS;
@@ -108,7 +108,7 @@ public class DependencyContainer {
         ).start();
         ACTIVE_DUELS = activeDuels;
         FINISHED_DUELS = finishedDuels;
-        USERS_RATING = new UsersRating(CONNECTION_HOLDER);
+        USERS_RATING = userName -> new UserRating(userName, CONNECTION_HOLDER);
     }
 
     public static ThreadLocal<Long> requestTimer() {
@@ -139,7 +139,7 @@ public class DependencyContainer {
         return DUELS;
     }
 
-    public static UsersRating usersRating() {
+    public static Function<String, UserRating> usersRating() {
         return USERS_RATING;
     }
 
