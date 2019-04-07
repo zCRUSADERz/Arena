@@ -1,6 +1,7 @@
 package ru.job4j;
 
 import ru.job4j.db.*;
+import ru.job4j.db.transactions.Transaction;
 import ru.job4j.domain.duels.ActiveDuels;
 import ru.job4j.domain.duels.Duels;
 import ru.job4j.domain.duels.FinishedDuels;
@@ -62,6 +63,7 @@ public class DependencyContainer {
                 new ThreadLocal<>(),
                 ThreadLocal.withInitial(() -> false)
         );
+        final Transaction transaction = new Transaction(CONNECTION_HOLDER);
         ACTIVE_DUEL_FACTORY = duelID ->
             new ActiveDuel(
                     duelID,
@@ -78,7 +80,9 @@ public class DependencyContainer {
                 httpRequest,
                 new MessageDigestFactory(passSalt).messageDigest()
         );
-        USERS_AUTHENTICATION = new UsersAuthentication(new Users(CONNECTION_HOLDER));
+        USERS_AUTHENTICATION = new UsersAuthentication(
+                new Users(CONNECTION_HOLDER)
+        );
         DUELS = new Duels(
                 CONNECTION_HOLDER,
                 ACTIVE_DUEL_FACTORY,
