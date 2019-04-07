@@ -35,8 +35,17 @@ public class ConnectionHolder implements AutoCloseable {
 
     public final void close() throws Exception {
         if (this.holdsNow.get()) {
-            this.connectionHolder.get().close();
-            this.holdsNow.set(false);
+            try {
+                this.connectionHolder.get().close();
+            } finally {
+                this.holdsNow.set(false);
+            }
+        }
+    }
+
+    public final void rollback() throws Exception {
+        if (this.holdsNow.get()) {
+            this.connectionHolder.get().rollback();
         }
     }
 }
