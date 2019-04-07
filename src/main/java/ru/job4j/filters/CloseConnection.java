@@ -21,6 +21,7 @@ public class CloseConnection extends HttpFilter {
             Optional<Exception> optException = Optional.empty();
             try {
                 super.doFilter(req, res, chain);
+                this.connectionHolder.commit();
             } catch (final Exception ex) {
                 optException = Optional.of(ex);
             } finally {

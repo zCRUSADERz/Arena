@@ -43,6 +43,12 @@ public class ConnectionHolder implements AutoCloseable {
         }
     }
 
+    public final void commit() throws SQLException {
+        if (this.holdsNow.get()) {
+            this.connectionHolder.get().commit();
+        }
+    }
+
     public final void rollback() throws Exception {
         if (this.holdsNow.get()) {
             this.connectionHolder.get().rollback();

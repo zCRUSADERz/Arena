@@ -1,13 +1,11 @@
 package ru.job4j;
 
 import ru.job4j.db.*;
+import ru.job4j.db.transactions.ActiveDuelsTransaction;
 import ru.job4j.db.transactions.AuthTransaction;
 import ru.job4j.db.transactions.DuelCreateTransaction;
 import ru.job4j.db.transactions.Transaction;
-import ru.job4j.domain.duels.ActiveDuels;
-import ru.job4j.domain.duels.Duels;
-import ru.job4j.domain.duels.DuelsSimple;
-import ru.job4j.domain.duels.FinishedDuels;
+import ru.job4j.domain.duels.*;
 import ru.job4j.domain.duels.duel.ActiveDuel;
 import ru.job4j.domain.duels.duel.FinishedDuel;
 import ru.job4j.domain.duels.duelists.ActiveDuelist;
@@ -107,7 +105,10 @@ public class DependencyContainer {
                         defaultUserName
                 )
         ).start();
-        ACTIVE_DUELS = new ActiveDuels(CONNECTION_HOLDER, DUELS);
+        ACTIVE_DUELS = new ActiveDuelsTransaction(
+                transaction,
+                new ActiveDuelsSimple(CONNECTION_HOLDER, DUELS)
+        );
         FINISHED_DUELS = new FinishedDuels(
                 CONNECTION_HOLDER,
                 duelID -> new FinishedDuel(
