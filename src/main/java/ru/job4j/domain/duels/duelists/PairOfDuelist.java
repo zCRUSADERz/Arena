@@ -1,5 +1,9 @@
 package ru.job4j.domain.duels.duelists;
 
+
+import java.util.HashMap;
+import java.util.Map;
+
 public class PairOfDuelist<T extends SimpleDuelist> {
     private final T first;
     private final T second;
@@ -31,6 +35,13 @@ public class PairOfDuelist<T extends SimpleDuelist> {
         } else {
             result = this.second;
         }
+        return result;
+    }
+
+    public final Map<String, String> attributesFor(final String userName) {
+        final Map<String, String> result
+                = new HashMap<>(this.first.attributesFor(userName));
+        result.putAll(this.second.attributesFor(userName));
         return result;
     }
 }
