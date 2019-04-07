@@ -1,138 +1,49 @@
 package ru.job4j.domain.duels;
 
 import ru.job4j.db.ConnectionHolder;
-import ru.job4j.domain.duels.duelists.DuelistInfo;
-import ru.job4j.domain.duels.duelists.PairOfDuelist;
-import ru.job4j.domain.duels.factories.LogsFactory;
-import ru.job4j.domain.duels.logs.FinalBlows;
-import ru.job4j.domain.duels.logs.results.DuelAttackResult;
+import ru.job4j.domain.duels.duel.FinishedDuel;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Optional;
+import java.util.function.IntFunction;
 
 public class FinishedDuels {
     private final ConnectionHolder connectionHolder;
-    private final FinalBlows finalBlows;
-    private final LogsFactory logsFactory;
+    private final IntFunction<FinishedDuel> finishedDuelFactory;
 
     public FinishedDuels(final ConnectionHolder connectionHolder,
-                         final FinalBlows finalBlows,
-                         final LogsFactory logsFactory) {
+                         final IntFunction<FinishedDuel> finishedDuelFactory) {
         this.connectionHolder = connectionHolder;
-        this.finalBlows = finalBlows;
-        this.logsFactory = logsFactory;
+        this.finishedDuelFactory = finishedDuelFactory;
     }
 
-
-    public final DuelInfo<DuelistInfo> duel(final String userName) {
-        final DuelInfo<DuelistInfo> result;
+    public final Optional<FinishedDuel> last(final String userName) {
+        final Optional<FinishedDuel> result;
         final String query = ""
-                + "SELECT ad1.user_name, ad1.health, ad1.damage, "
-                + "d.duel_id, "
-                + "ad2.user_name, ad2.health, ad2.damage "
-                + "FROM duelists_history AS ad1 "
-                + "JOIN duels_history AS d "
-                + "ON ad1.duel_id = d.duel_id AND ad1.user_name = ? "
-                + "JOIN duelists_history AS ad2  "
-                + "ON ad2.duel_id = d.duel_id AND ad2.user_name != ? "
-                + "ORDER BY d.finished DESC "
+                + "SELECT dsh.duel_id FROM duelists_history AS dsh "
+                + "JOIN duels_history AS dh "
+                + "ON dsh.duel_id = dh.duel_id AND dsh.user_name = ? "
+                + "ORDER BY dh.finished DESC "
                 + "LIMIT 1";
         try (final PreparedStatement statement
                      = this.connectionHolder.connection().prepareStatement(query)) {
             statement.setString(1, userName);
-            statement.setString(2, userName);
             try (final ResultSet resultSet = statement.executeQuery()) {
                 if (resultSet.next()) {
-                    final int duelID = resultSet.getInt("d.duel_id");
-                    result = new DuelInfo<>(
-                            new PairOfDuelist<>(
-                                    new DuelistInfo(
-                                            resultSet.getString("ad1.user_name"),
-                                            resultSet.getInt("ad1.damage"),
-                                            resultSet.getInt("ad1.health")
-                                    ),
-                                    new DuelistInfo(
-                                            resultSet.getString("ad2.user_name"),
-                                            resultSet.getInt("ad2.damage"),
-                                            resultSet.getInt("ad2.health")
-                                    )
-                            ),
-                            this.logsFactory.logs(duelID)
+                    result = Optional.of(
+                            this.finishedDuelFactory.apply(
+                                    resultSet.getInt("dsh.duel_id")
+                            )
                     );
                 } else {
-                    throw new IllegalStateException(String.format(
-                            "Finished duels for user: %s, not found.",
-                            userName
-                    ));
+                    result = Optional.empty();
                 }
             }
         } catch (final SQLException ex) {
             throw new IllegalStateException(ex);
         }
         return result;
-    }
-
-    public final void create(final DuelAttackResult attackResult) {
-        try {
-            final String copyDuel = ""
-                    + "INSERT INTO duels_history (duel_id, created) "
-                    + "SELECT duel_id, created FROM active_duels WHERE duel_id = ?";
-            try (final PreparedStatement statement
-                         = this.connectionHolder.connection().prepareStatement(copyDuel)) {
-                statement.setInt(1, attackResult.duelID());
-                if (statement.executeUpdate() != 1) {
-                    throw new IllegalStateException(String.format(
-                            "Duel with id: %d, not found.",
-                            attackResult.duelID()
-                    ));
-                }
-            }
-            final String copyDuelists = ""
-                    + "INSERT INTO duelists_history "
-                    + "(user_name, duel_id, start_health, health, damage) "
-                    + "SELECT user_name, duel_id, start_health, health, damage "
-                    + "FROM active_duelists WHERE duel_id = ?";
-            try (final PreparedStatement statement
-                         = this.connectionHolder.connection().prepareStatement(copyDuelists)) {
-                statement.setInt(1, attackResult.duelID());
-                if (statement.executeUpdate() != 2) {
-                    throw new IllegalStateException(String.format(
-                            "In the duel: %d, is not two duelists.",
-                            attackResult.duelID()
-                    ));
-                }
-            }
-            final String copyLogs = ""
-                    + "INSERT INTO attack_log_history "
-                    + "         (attacker_name, time, duel_id, target_name, damage) "
-                    + "SELECT attacker_name, time, duel_id, target_name, damage "
-                    + "FROM attack_log WHERE duel_id = ?";
-            try (final PreparedStatement statement
-                         = this.connectionHolder.connection().prepareStatement(copyLogs)) {
-                statement.setInt(1, attackResult.duelID());
-                if (statement.executeUpdate() < 1) {
-                    throw new IllegalStateException(String.format(
-                            "The log for duel: %d, must contain at least one message.",
-                            attackResult.duelID()
-                    ));
-                }
-            }
-            this.finalBlows.create(attackResult);
-            final String deleteActiveDuel = ""
-                    + "DELETE FROM active_duels WHERE duel_id = ?";
-            try (final PreparedStatement statement
-                         = this.connectionHolder.connection().prepareStatement(deleteActiveDuel)) {
-                statement.setInt(1, attackResult.duelID());
-                if (statement.executeUpdate() != 1) {
-                    throw new IllegalStateException(String.format(
-                            "Duel: %d, not found.",
-                            attackResult.duelID()
-                    ));
-                }
-            }
-        } catch (final SQLException ex) {
-            throw new IllegalStateException(ex);
-        }
     }
 }
