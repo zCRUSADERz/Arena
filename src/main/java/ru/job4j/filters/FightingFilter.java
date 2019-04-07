@@ -2,6 +2,7 @@ package ru.job4j.filters;
 
 import ru.job4j.DependencyContainer;
 import ru.job4j.domain.duels.ActiveDuels;
+import ru.job4j.domain.duels.AttackAction;
 
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
@@ -29,30 +30,19 @@ public class FightingFilter extends HttpFilter {
         HttpSession session = req.getSession();
         final String userName = (String) session.getAttribute("userName");
         final String requestURI = req.getRequestURI();
-        if (this.activeDuels.inDuel(userName)) {
-            session.setAttribute("fighting", true);
-            req.setAttribute("fighting", true);
+        final Optional<AttackAction> optAttack = this.activeDuels.inDuel(userName);
+        if (optAttack.isPresent()) {
+            req.setAttribute(
+                    "attackAction",
+                    optAttack.get()
+            );
             if (requestURI.equals("/arena/duel")) {
                 chain.doFilter(req, resp);
             } else {
                 resp.sendRedirect(req.getContextPath() + "/arena/duel");
             }
         } else {
-            final Optional<Boolean> optFighting = Optional.ofNullable(
-                    (Boolean) session.getAttribute("fighting")
-            );
-            session.setAttribute("fighting", false);
-            if (requestURI.equals("/arena/duel")) {
-                if (optFighting.orElse(false)) {
-                    resp.sendRedirect(
-                            req.getContextPath() + "/arena/duel/history"
-                    );
-                } else {
-                    resp.sendRedirect(req.getContextPath() + "/arena");
-                }
-            } else {
-                chain.doFilter(req, resp);
-            }
+            chain.doFilter(req, resp);
         }
     }
 }
