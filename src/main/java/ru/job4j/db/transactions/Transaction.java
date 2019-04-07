@@ -13,7 +13,7 @@ public class Transaction {
 
     public final void start() {
         try {
-            this.connectionHolder.connection().setAutoCommit(true);
+            this.connectionHolder.connection().setAutoCommit(false);
         } catch (final SQLException ex) {
             throw new IllegalStateException(ex);
         }

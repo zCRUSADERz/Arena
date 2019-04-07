@@ -1,9 +1,11 @@
 package ru.job4j;
 
 import ru.job4j.db.*;
+import ru.job4j.db.transactions.DuelCreateTransaction;
 import ru.job4j.db.transactions.Transaction;
 import ru.job4j.domain.duels.ActiveDuels;
 import ru.job4j.domain.duels.Duels;
+import ru.job4j.domain.duels.DuelsSimple;
 import ru.job4j.domain.duels.FinishedDuels;
 import ru.job4j.domain.duels.duel.ActiveDuel;
 import ru.job4j.domain.duels.duel.FinishedDuel;
@@ -83,11 +85,14 @@ public class DependencyContainer {
         USERS_AUTHENTICATION = new UsersAuthentication(
                 new Users(CONNECTION_HOLDER)
         );
-        DUELS = new Duels(
-                CONNECTION_HOLDER,
-                ACTIVE_DUEL_FACTORY,
-                new FinalBlows(CONNECTION_HOLDER),
-                userName -> new User(userName, CONNECTION_HOLDER)
+        DUELS = new DuelCreateTransaction(
+                transaction,
+                new DuelsSimple(
+                        CONNECTION_HOLDER,
+                        ACTIVE_DUEL_FACTORY,
+                        new FinalBlows(CONNECTION_HOLDER),
+                        userName -> new User(userName, CONNECTION_HOLDER)
+                )
         );
         USERS_QUEUE = new UsersQueue();
         new Thread(
