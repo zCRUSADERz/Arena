@@ -15,6 +15,7 @@ import java.util.function.Function;
 public class DuelsPage extends HttpServlet {
     private UsersQueue queue;
     private Function<String, UserRating> userRatingFactory;
+    private int turnDuration;
 
     @Override
     public final void doGet(final HttpServletRequest req,
@@ -22,7 +23,9 @@ public class DuelsPage extends HttpServlet {
             throws ServletException, IOException {
         final boolean waitingFight
                 = (Boolean) req.getAttribute("waitingFight");
-        if (!waitingFight) {
+        if (waitingFight) {
+            req.setAttribute("turnDuration", this.turnDuration);
+        } else {
             HttpSession session = req.getSession();
             final String userName = (String) session.getAttribute("userName");
             req.setAttribute(
@@ -45,7 +48,7 @@ public class DuelsPage extends HttpServlet {
         if ("start".equals(action) && !waitingFight) {
             try {
                 this.queue.offer(userName);
-                Thread.sleep(50);
+                Thread.sleep(100);
             } catch (InterruptedException ex) {
                 throw new IllegalStateException(ex);
             }
@@ -60,5 +63,6 @@ public class DuelsPage extends HttpServlet {
         super.init();
         this.queue = DependencyContainer.usersQueue();
         this.userRatingFactory = DependencyContainer.usersRating();
+        this.turnDuration = DependencyContainer.turnDuration() / 1000;
     }
 }

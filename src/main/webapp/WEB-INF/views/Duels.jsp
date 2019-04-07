@@ -5,7 +5,7 @@
 <head>
     <title>Duels</title>
     <c:if test="${requestScope.waitingFight}">
-        <meta http-equiv="refresh" content="10">
+        <meta http-equiv="refresh" content="${requestScope.turnDuration}">
     </c:if>
     <style type="text/css">
         form { text-align: center}
@@ -31,11 +31,11 @@
             </tr>
             <tr>
                 <td>Побед</td>
-                <td>${ratingAttr.rating}</td>
+                <td>${ratingAttr.victories}</td>
             </tr>
             <tr>
                 <td>Поражений</td>
-                <td>${ratingAttr.rating}</td>
+                <td>${ratingAttr.defeat}</td>
             </tr>
         </table>
         <form action="${requestScope.contextPath}/arena/duels" method="post">

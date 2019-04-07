@@ -1,65 +1,75 @@
-<%@ page import="ru.job4j.domain.duels.duelists.Duelist" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <jsp:directive.page contentType="text/html; charset=UTF-8" />
 <jsp:directive.page pageEncoding="UTF-8" />
 <html>
 <head>
     <title>Дуэль</title>
-    <c:if test="${not empty requestScope.timer}">
-        <meta http-equiv="refresh" content="${requestScope.timer}">
-    </c:if>
-    <c:if test="${not requestScope.canAttack}" >
-        <meta http-equiv="refresh" content="10">
-    </c:if>
+    <%--@elvariable id="attr" type="java.util.Map<String, String>"--%>
+    <c:choose>
+        <c:when test="${not empty attr.startTimer}" >
+            <meta http-equiv="refresh" content="${attr.startTimer}">
+        </c:when>
+        <c:when test="${not empty attr.turnTimer}" >
+            <meta http-equiv="refresh" content="${attr.turnTimer}">
+        </c:when>
+    </c:choose>
     <style type="text/css">
         form { text-align: center}
+        progress {
+            background: green;
+        }
     </style>
 </head>
 <body>
 <h4 align="center">Дуэль</h4>
-<c:if test="${not empty requestScope.timer}">
-    <p align="center">До начала боя осталось ${requestScope.timer} секунд.</p>
+<c:if test="${not empty attr.startTimer}">
+    <p align="center">До начала боя осталось ${attr.startTimer} секунд.</p>
     <p align="center">Страница обновится автоматически, по истечению таймера.</p>
 </c:if>
 <table align="center">
     <thead>
     <tr>
         <th>Вы</th>
-        <th><%= ((Duelist) request.getAttribute("user")).name() %></th>
+        <th>${attr.your_name}</th>
         <th>Противник</th>
-        <th><%= ((Duelist) request.getAttribute("opponent")).name() %></th>
+        <th>${attr.name}</th>
     </tr>
     </thead>
     <tbody>
     <tr>
         <td>Урон:</td>
-        <td><%= ((Duelist) request.getAttribute("user")).damage() %></td>
+        <td>${attr.your_damage}</td>
         <td>Урон:</td>
-        <td><%= ((Duelist) request.getAttribute("opponent")).damage() %></td>
+        <td>${attr.damage}</td>
     </tr>
     <tr>
         <td>Жизни:</td>
-        <td><%= ((Duelist) request.getAttribute("user")).health() %></td>
-        <td>Жизни:</td>
-        <td><%= ((Duelist) request.getAttribute("opponent")).health() %></td>
-    </tr>
-    <tr>
         <td>
-            <form action="${requestScope.contextPath}/arena/duel" method="get">
-                <input type="submit" value="Обновить" align="center">
-            </form>
+            <progress value="${attr.your_health}" max="${attr.your_start_health}"></progress>
         </td>
-        <c:if test="${requestScope.canAttack}" >
+        <td>Жизни:</td>
+        <td><progress value="${attr.health}" max="${attr.start_health}"></progress></td>
+    </tr>
+    <c:if test="${empty attr.finished}" >
+        <tr>
             <td>
-                <form action="${requestScope.contextPath}/arena/duel" method="post">
-                    <input type="submit" value="Атаковать" align="center">
+                <form action="${requestScope.contextPath}/arena/duel" method="get">
+                    <input type="submit" value="Обновить" align="center">
                 </form>
             </td>
-        </c:if>
-    </tr>
+            <c:if test="${empty attr.startTimer && empty attr.turnTimer}" >
+                <td>
+                    <form action="${requestScope.contextPath}/arena/duel" method="post">
+                        <input type="submit" value="Атаковать" align="center">
+                    </form>
+                </td>
+            </c:if>
+        </tr>
+    </c:if>
     </tbody>
 </table>
-<c:forEach var="log" items="${requestScope.logs}" >
+<%--@elvariable id="logs" type="java.util.List<String>"--%>
+<c:forEach var="log" items="${logs}" >
     <p align="center" ><c:out value="${log}" /></p>
 </c:forEach>
 <p align="center"><jsp:include page="/techInfo" /></p>

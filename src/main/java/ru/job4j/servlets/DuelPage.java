@@ -1,12 +1,11 @@
 package ru.job4j.servlets;
 
 import ru.job4j.DependencyContainer;
-import ru.job4j.domain.duels.ActiveDuels;
-import ru.job4j.domain.duels.Duel;
-import ru.job4j.domain.duels.Duels;
-import ru.job4j.domain.duels.duelists.Duelist;
-import ru.job4j.domain.duels.logs.AttackLog;
-import ru.job4j.domain.duels.logs.results.DuelAttackResult;
+import ru.job4j.domain.duels.AttackAction;
+import ru.job4j.domain.duels.FinishedDuels;
+import ru.job4j.domain.duels.duel.ActiveDuel;
+import ru.job4j.domain.duels.duel.DuelAttributes;
+import ru.job4j.domain.duels.duel.FinishedDuel;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -14,12 +13,12 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
-import java.util.Collection;
-import java.util.stream.Collectors;
+import java.util.Optional;
+import java.util.function.IntFunction;
 
 public class DuelPage extends HttpServlet {
-    private ActiveDuels activeDuels;
-    private Duels duels;
+    private IntFunction<ActiveDuel> activeDuelFactory;
+    private FinishedDuels finishedDuels;
 
     @Override
     public final void doGet(final HttpServletRequest req,
@@ -27,47 +26,53 @@ public class DuelPage extends HttpServlet {
             throws ServletException, IOException {
         HttpSession session = req.getSession();
         final String userName = (String) session.getAttribute("userName");
-        final Duel duel = this.activeDuels.duel(userName);
-        final Duelist user = duel.duelist(userName);
-        req.setAttribute("user", user);
-        final Duelist opponent = duel.opponent(userName);
-        req.setAttribute("opponent", opponent);
-        if (duel.started()) {
-            if (user.canAttack(opponent)) {
-                req.setAttribute("canAttack", true);
-            }
-            final Collection<AttackLog> logs = duel.logs();
-            final Collection<String> processedLog = logs
-                    .stream()
-                    .sequential()
-                    .map(attackLog -> attackLog.printFor(userName))
-                    .collect(Collectors.toList());
-            req.setAttribute("logs", processedLog);
+        final Optional<AttackAction> optAttack = Optional.ofNullable(
+                (AttackAction) req.getAttribute("attackAction")
+        );
+        final Optional<DuelAttributes> optAttributes;
+        if (optAttack.isPresent()) {
+            final AttackAction attackAction = optAttack.get();
+            final ActiveDuel activeDuel
+                    = this.activeDuelFactory.apply(attackAction.duelID());
+            optAttributes = Optional.of(activeDuel.attributesFor(userName));
         } else {
-            req.setAttribute("timer", duel.timer());
+            final Optional<FinishedDuel> optionalFinished
+                    = this.finishedDuels.last(userName);
+            if (optionalFinished.isPresent()) {
+                final FinishedDuel finishedDuel = optionalFinished.get();
+                optAttributes = Optional.of(
+                        finishedDuel.attributesFor(userName)
+                );
+            } else {
+                optAttributes = Optional.empty();
+            }
         }
-        req.getRequestDispatcher("/WEB-INF/views/Duel.jsp")
-                .forward(req, resp);
+        if (optAttributes.isPresent()) {
+            final DuelAttributes attributes = optAttributes.get();
+            req.setAttribute("attr", attributes.attributes());
+            req.setAttribute("logs", attributes.logAttributes());
+            req.getRequestDispatcher("/WEB-INF/views/Duel.jsp")
+                    .forward(req, resp);
+        } else {
+            resp.sendRedirect(req.getContextPath() + "/arena/duels");
+        }
     }
 
     @Override
     public final void doPost(final HttpServletRequest req,
                              final HttpServletResponse resp)
-            throws IOException, ServletException {
-        HttpSession session = req.getSession();
-        final String userName = (String) session.getAttribute("userName");
-        final DuelAttackResult result = this.duels.turn(userName);
-        if (result.killed()) {
-            resp.sendRedirect(req.getContextPath() + "/arena/duel/history");
-        } else {
-            this.doGet(req, resp);
-        }
+            throws IOException {
+        final Optional<AttackAction> optAttack = Optional.ofNullable(
+                (AttackAction) req.getAttribute("attackAction")
+        );
+        optAttack.ifPresent(AttackAction::act);
+        resp.sendRedirect(req.getContextPath() + "/arena/duel");
     }
 
     @Override
     public final void init() throws ServletException {
         super.init();
-        this.activeDuels = DependencyContainer.activeDuels();
-        this.duels = DependencyContainer.duels();
+        this.activeDuelFactory = DependencyContainer.activeDuelFactory();
+        this.finishedDuels = DependencyContainer.finishedDuels();
     }
 }

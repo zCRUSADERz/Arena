@@ -4,23 +4,28 @@ import ru.job4j.db.*;
 import ru.job4j.domain.duels.ActiveDuels;
 import ru.job4j.domain.duels.Duels;
 import ru.job4j.domain.duels.FinishedDuels;
-import ru.job4j.domain.duels.factories.SimpleDuelFactory;
-import ru.job4j.domain.duels.factories.SimpleDuelistFactory;
-import ru.job4j.domain.duels.logs.AttackLogs;
+import ru.job4j.domain.duels.duel.ActiveDuel;
+import ru.job4j.domain.duels.duel.FinishedDuel;
+import ru.job4j.domain.duels.duelists.ActiveDuelist;
+import ru.job4j.domain.duels.duelists.FinishedDuelist;
+import ru.job4j.domain.duels.logs.FinalBlow;
 import ru.job4j.domain.duels.logs.FinalBlows;
-import ru.job4j.domain.duels.logs.GeneralDuelLog;
+import ru.job4j.domain.duels.logs.FinishedDuelLog;
 import ru.job4j.domain.queue.UsersQueue;
 import ru.job4j.domain.queue.UsersQueueConsumer;
 import ru.job4j.domain.rating.UserRating;
-import ru.job4j.domain.users.MessageDigestFactory;
-import ru.job4j.domain.users.UnverifiedUser;
+import ru.job4j.domain.users.User;
 import ru.job4j.domain.users.Users;
-import ru.job4j.domain.users.UsersAuthentication;
+import ru.job4j.domain.users.auth.MessageDigestFactory;
+import ru.job4j.domain.users.auth.UnverifiedUser;
+import ru.job4j.domain.users.auth.UsersAuthentication;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.function.Function;
+import java.util.function.IntFunction;
 
 public class DependencyContainer {
+    private final static int TURN_DURATION;
     private final static ConnectionHolder CONNECTION_HOLDER;
     private final static ThreadLocal<Integer> QUERY_COUNTER;
     private final static ThreadLocal<Long> QUERY_TIMER;
@@ -32,9 +37,10 @@ public class DependencyContainer {
     private final static Duels DUELS;
     private final static ActiveDuels ACTIVE_DUELS;
     private final static FinishedDuels FINISHED_DUELS;
+    private final static IntFunction<ActiveDuel> ACTIVE_DUEL_FACTORY;
 
     static {
-        final int turnDuration = 10000;
+        TURN_DURATION = 10000;
         final int duelStartDelay = 30;
         final String defaultUserName = "";
         final String passSalt = "8w@8c4!48kww&0g";
@@ -56,37 +62,18 @@ public class DependencyContainer {
                 new ThreadLocal<>(),
                 ThreadLocal.withInitial(() -> false)
         );
-        final ActiveDuels activeDuels = new ActiveDuels(
-                CONNECTION_HOLDER,
-                new SimpleDuelistFactory(
-                        turnDuration,
-                        CONNECTION_HOLDER
-                ),
-                new SimpleDuelFactory(
-                        duelStartDelay,
-                        new AttackLogs(
-                                CONNECTION_HOLDER,
-                                "attack_log"
-                        )
-                ),
-                new AttackLogs(
-                        CONNECTION_HOLDER,
-                        "attack_log"
-                )
-        );
-        final FinishedDuels finishedDuels = new FinishedDuels(
-                CONNECTION_HOLDER,
-                new FinalBlows(CONNECTION_HOLDER),
-                new GeneralDuelLog(
-                        new AttackLogs(
-                                CONNECTION_HOLDER,
-                                "attack_log_history"
-                        ),
-                        new FinalBlows(
-                                CONNECTION_HOLDER
-                        )
-                )
-        );
+        ACTIVE_DUEL_FACTORY = duelID ->
+            new ActiveDuel(
+                    duelID,
+                    CONNECTION_HOLDER,
+                    duelStartDelay,
+                    userName ->
+                            new ActiveDuelist(
+                                    userName,
+                                    CONNECTION_HOLDER,
+                                    TURN_DURATION
+                            )
+            );
         USERS_FACTORY = httpRequest -> new UnverifiedUser(
                 httpRequest,
                 new MessageDigestFactory(passSalt).messageDigest()
@@ -94,8 +81,9 @@ public class DependencyContainer {
         USERS_AUTHENTICATION = new UsersAuthentication(new Users(CONNECTION_HOLDER));
         DUELS = new Duels(
                 CONNECTION_HOLDER,
-                activeDuels,
-                finishedDuels
+                ACTIVE_DUEL_FACTORY,
+                new FinalBlows(CONNECTION_HOLDER),
+                userName -> new User(userName, CONNECTION_HOLDER)
         );
         USERS_QUEUE = new UsersQueue();
         new Thread(
@@ -105,9 +93,32 @@ public class DependencyContainer {
                         defaultUserName
                 )
         ).start();
-        ACTIVE_DUELS = activeDuels;
-        FINISHED_DUELS = finishedDuels;
+        ACTIVE_DUELS = new ActiveDuels(CONNECTION_HOLDER, DUELS);
+        FINISHED_DUELS = new FinishedDuels(
+                CONNECTION_HOLDER,
+                duelID -> new FinishedDuel(
+                        duelID,
+                        CONNECTION_HOLDER,
+                        userName -> new FinishedDuelist(
+                                userName,
+                                duelID,
+                                CONNECTION_HOLDER
+                        ),
+                        innerDuelID -> new FinishedDuelLog(
+                                innerDuelID,
+                                CONNECTION_HOLDER,
+                                new FinalBlow(
+                                        innerDuelID,
+                                        CONNECTION_HOLDER
+                                )
+                        )
+                )
+        );
         USERS_RATING = userName -> new UserRating(userName, CONNECTION_HOLDER);
+    }
+
+    public static int turnDuration() {
+        return TURN_DURATION;
     }
 
     public static ThreadLocal<Long> requestTimer() {
@@ -142,15 +153,19 @@ public class DependencyContainer {
         return USERS_RATING;
     }
 
-    public static FinishedDuels finishedDuels() {
-        return FINISHED_DUELS;
-    }
-
     public static Function<HttpServletRequest, UnverifiedUser> usersFactory() {
         return USERS_FACTORY;
     }
 
     public static ConnectionHolder connectionHolder() {
         return CONNECTION_HOLDER;
+    }
+
+    public static IntFunction<ActiveDuel> activeDuelFactory() {
+        return ACTIVE_DUEL_FACTORY;
+    }
+
+    public static FinishedDuels finishedDuels() {
+        return FINISHED_DUELS;
     }
 }
