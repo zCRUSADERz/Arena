@@ -1,6 +1,7 @@
 package ru.job4j;
 
 import ru.job4j.db.*;
+import ru.job4j.db.transactions.AuthTransaction;
 import ru.job4j.db.transactions.DuelCreateTransaction;
 import ru.job4j.db.transactions.Transaction;
 import ru.job4j.domain.duels.ActiveDuels;
@@ -22,6 +23,7 @@ import ru.job4j.domain.users.Users;
 import ru.job4j.domain.users.auth.MessageDigestFactory;
 import ru.job4j.domain.users.auth.UnverifiedUser;
 import ru.job4j.domain.users.auth.UsersAuthentication;
+import ru.job4j.domain.users.auth.UsersAuthenticationSimple;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.function.Function;
@@ -82,8 +84,11 @@ public class DependencyContainer {
                 httpRequest,
                 new MessageDigestFactory(passSalt).messageDigest()
         );
-        USERS_AUTHENTICATION = new UsersAuthentication(
-                new Users(CONNECTION_HOLDER)
+        USERS_AUTHENTICATION = new AuthTransaction(
+                transaction,
+                new UsersAuthenticationSimple(
+                        new Users(CONNECTION_HOLDER)
+                )
         );
         DUELS = new DuelCreateTransaction(
                 transaction,

@@ -18,7 +18,7 @@ public class Users {
     public final AuthenticationResult authorize(
             final UserCredentials userCredentials) {
         final AuthenticationResult result;
-        final String select = "SELECT password FROM users WHERE name = ?";
+        final String select = "SELECT password FROM users WHERE name = ? FOR UPDATE";
         try (final PreparedStatement statement
                      = this.connectionHolder.connection().prepareStatement(select)) {
             statement.setString(1, userCredentials.name());
