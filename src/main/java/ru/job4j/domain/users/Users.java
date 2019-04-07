@@ -1,6 +1,7 @@
 package ru.job4j.domain.users;
 
 import ru.job4j.db.ConnectionHolder;
+import ru.job4j.domain.users.auth.AuthenticationResult;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -41,13 +42,13 @@ public class Users {
 
     public final boolean register(final UserCredentials user) {
         final boolean result;
-        final String insert = "INSERT INTO users (name, password) VALUES (?, ?)";
+        final String insert = "INSERT INTO users (name, password) VALUE (?, ?)";
         try (final PreparedStatement statement
                      = this.connectionHolder.connection().prepareStatement(insert)) {
             statement.setString(1, user.name());
             statement.setBytes(2, user.password());
             final int rows = statement.executeUpdate();
-            result = rows != 1;
+            result = rows == 1;
         } catch (final SQLException ex) {
             throw new IllegalStateException(ex);
         }

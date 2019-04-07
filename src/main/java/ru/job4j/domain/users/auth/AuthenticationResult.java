@@ -1,4 +1,4 @@
-package ru.job4j.domain.users;
+package ru.job4j.domain.users.auth;
 
 public class AuthenticationResult {
     private final boolean registered;

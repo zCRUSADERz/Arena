@@ -1,7 +1,7 @@
 package ru.job4j.domain.users;
 
 import ru.job4j.db.ConnectionHolder;
-import ru.job4j.domain.duels.logs.results.AttackResult;
+import ru.job4j.domain.duels.results.AttackResult;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -26,7 +26,7 @@ public class User {
         if (this.userName.equals(attackResult.attacker())) {
             rating = 1;
         } else if (this.userName.equals(attackResult.target())) {
-            rating = 2;
+            rating = -1;
         } else {
             throw new IllegalStateException(String.format(
                     "User: %s, not found in attack result: %s",

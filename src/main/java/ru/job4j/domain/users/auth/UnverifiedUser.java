@@ -1,8 +1,9 @@
-package ru.job4j.domain.users;
+package ru.job4j.domain.users.auth;
 
 import org.cactoos.Scalar;
 import org.cactoos.scalar.StickyScalar;
 import org.cactoos.scalar.UncheckedScalar;
+import ru.job4j.domain.users.UserCredentials;
 
 import javax.servlet.http.HttpServletRequest;
 import java.nio.charset.StandardCharsets;

@@ -1,4 +1,6 @@
-package ru.job4j.domain.users;
+package ru.job4j.domain.users.auth;
+
+import ru.job4j.domain.users.Users;
 
 import java.util.Collections;
 import java.util.Map;

@@ -1,4 +1,4 @@
-package ru.job4j.domain.users;
+package ru.job4j.domain.users.auth;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
