@@ -28,9 +28,9 @@ public class UserRating {
                 + "FROM users WHERE name = ?";
         try (final PreparedStatement statement
                      = this.connectionHolder.connection().prepareStatement(query)) {
-            statement.setString(1, userName);
-            statement.setString(2, userName);
-            statement.setString(3, userName);
+            statement.setString(1, this.userName);
+            statement.setString(2, this.userName);
+            statement.setString(3, this.userName);
             try (final ResultSet resultSet = statement.executeQuery()) {
                 if (resultSet.next()) {
                     result = Map.of(
