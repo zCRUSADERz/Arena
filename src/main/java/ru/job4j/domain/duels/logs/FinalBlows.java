@@ -1,10 +1,9 @@
 package ru.job4j.domain.duels.logs;
 
 import ru.job4j.db.ConnectionHolder;
-import ru.job4j.domain.duels.logs.results.DuelAttackResult;
+import ru.job4j.domain.duels.results.DuelAttackResult;
 
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 
 public class FinalBlows {
@@ -12,33 +11,6 @@ public class FinalBlows {
 
     public FinalBlows(final ConnectionHolder connectionHolder) {
         this.connectionHolder = connectionHolder;
-    }
-
-    public final AttackLog finalBlow(final int duelID) {
-        final AttackLog result;
-        final String insertQuery = ""
-                + "SELECT attacker_name, target_name "
-                + "FROM final_blow WHERE duel_id = ?";
-        try (final PreparedStatement statement
-                     = this.connectionHolder.connection().prepareStatement(insertQuery)) {
-            statement.setInt(1, duelID);
-            try (final ResultSet resultSet = statement.executeQuery()) {
-                if (resultSet.next()) {
-                    result = new FinalBlow(
-                            resultSet.getString("attacker_name"),
-                            resultSet.getString("target_name")
-                    );
-                } else {
-                    throw new IllegalStateException(String.format(
-                            "Final blow for duel: %d, not found.",
-                            duelID
-                    ));
-                }
-            }
-        } catch (final SQLException ex) {
-            throw new IllegalStateException(ex);
-        }
-        return result;
     }
 
     public final void create(final DuelAttackResult attackResult) {
