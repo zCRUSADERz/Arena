@@ -7,6 +7,12 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Optional;
 
+/**
+ * Active duels.
+ *
+ * @author Alexander Yakovlev (sanyakovlev@yandex.ru)
+ * @since 6.04.2019
+ */
 public class ActiveDuelsSimple implements ActiveDuels {
     private final ConnectionHolder connectionHolder;
     private final Duels duels;
@@ -17,6 +23,9 @@ public class ActiveDuelsSimple implements ActiveDuels {
         this.duels = duels;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public final Optional<AttackAction> inDuel(final String userName) {
         final Optional<AttackAction> result;
         final String query = ""
