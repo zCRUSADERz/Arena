@@ -2,6 +2,12 @@ package ru.job4j.db;
 
 import com.zaxxer.hikari.HikariConfig;
 
+/**
+ * DBConfig.
+ *
+ * @author Alexander Yakovlev (sanyakovlev@yandex.ru)
+ * @since 2.04.2019
+ */
 public class DBConfig {
     private final String username;
     private final String password;
@@ -15,6 +21,10 @@ public class DBConfig {
         this.password = password;
     }
 
+    /**
+     * Create Hikari config.
+     * @return Hikari config.
+     */
     public final HikariConfig config() {
         HikariConfig config = new HikariConfig();
         config.setDriverClassName("com.mysql.cj.jdbc.Driver");

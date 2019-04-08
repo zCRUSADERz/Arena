@@ -9,6 +9,12 @@ import java.sql.PreparedStatement;
 import java.sql.Statement;
 import java.util.function.Function;
 
+/**
+ * Connection proxy.
+ *
+ * @author Alexander Yakovlev (sanyakovlev@yandex.ru)
+ * @since 30.03.2019
+ */
 public class ConnectionHandler implements InvocationHandler {
     private final Connection original;
     private final Function<Statement, InvocationHandler> handlerFactory;
@@ -20,7 +26,18 @@ public class ConnectionHandler implements InvocationHandler {
         this.handlerFactory = handlerFactory;
     }
 
-    public final Object invoke(Object proxy, Method method, Object[] args)
+    /**
+     * Wraps Statement and PreparedStatement in special implementations.
+     * @param proxy proxy.
+     * @param method method.
+     * @param args args.
+     * @return result of origin Connection.
+     * @throws IllegalAccessException IllegalAccessException.
+     * @throws IllegalArgumentException IllegalArgumentException
+     * @throws InvocationTargetException InvocationTargetException.
+     */
+    public final Object invoke(final Object proxy, final Method method,
+                               final Object[] args)
             throws IllegalAccessException, IllegalArgumentException,
             InvocationTargetException {
         final Object result;
@@ -29,7 +46,7 @@ public class ConnectionHandler implements InvocationHandler {
                     Statement.class.getClassLoader(),
                     new Class[] {Statement.class},
                     this.handlerFactory.apply(
-                            (Statement) method.invoke(original, args)
+                            (Statement) method.invoke(this.original, args)
                     )
             );
         } else if (method.getName().equals("prepareStatement")) {
@@ -37,11 +54,11 @@ public class ConnectionHandler implements InvocationHandler {
                     PreparedStatement.class.getClassLoader(),
                     new Class[] {PreparedStatement.class},
                     this.handlerFactory.apply(
-                            (PreparedStatement) method.invoke(original, args)
+                            (PreparedStatement) method.invoke(this.original, args)
                     )
             );
         } else {
-            result = method.invoke(original, args);
+            result = method.invoke(this.original, args);
         }
         return result;
     }
