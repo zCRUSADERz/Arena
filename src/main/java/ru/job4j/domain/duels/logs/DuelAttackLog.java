@@ -10,18 +10,29 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.stream.Collectors;
 
-public class DuelLog {
+/**
+ * Attack log.
+ *
+ * @author Alexander Yakovlev (sanyakovlev@yandex.ru)
+ * @since 7.04.2019
+ */
+public class DuelAttackLog {
     private final int duelID;
     private final ConnectionHolder connectionHolder;
     private final String query;
 
-    public DuelLog(final int duelID, final String query,
-                   final ConnectionHolder connectionHolder) {
+    public DuelAttackLog(final int duelID, final String query,
+                         final ConnectionHolder connectionHolder) {
         this.duelID = duelID;
         this.query = query;
         this.connectionHolder = connectionHolder;
     }
 
+    /**
+     * Prepares all the necessary information for rendering the page.
+     * @param userName prepares for user.
+     * @return collection of log lines for user.
+     */
     public final Collection<String> attributesFor(final String userName) {
         return this.log()
                 .stream()
@@ -30,6 +41,9 @@ public class DuelLog {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * @return collection of attack log entries.
+     */
     public final Collection<AttackLog> log() {
         final Collection<AttackLog> result;
         try (PreparedStatement statement

@@ -6,6 +6,14 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+/**
+ * Finished duel log.
+ *
+ * Log for completed duels. Includes a log of all attacks and a final blow log.
+ *
+ * @author Alexander Yakovlev (sanyakovlev@yandex.ru)
+ * @since 6.04.2019
+ */
 public class FinishedDuelLog {
     private final int duelID;
     private final ConnectionHolder connectionHolder;
@@ -19,13 +27,18 @@ public class FinishedDuelLog {
         this.finalBlow = finalBlow;
     }
 
+    /**
+     * Prepares all the necessary information for rendering the page.
+     * @param userName prepares for user.
+     * @return collection of log lines for user.
+     */
     public final Collection<String> attributesFor(final String userName) {
         final String query = ""
                 + "SELECT attacker_name, target_name, damage "
                 + "FROM attack_log_history  WHERE duel_id = ? "
                 + "ORDER BY time";
         final List<String> result = new ArrayList<>(
-                new DuelLog(
+                new DuelAttackLog(
                         this.duelID,
                         query,
                         this.connectionHolder

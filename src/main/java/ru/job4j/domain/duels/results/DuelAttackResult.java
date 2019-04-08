@@ -1,5 +1,11 @@
 package ru.job4j.domain.duels.results;
 
+/**
+ * Duel attack result.
+ *
+ * @author Alexander Yakovlev (sanyakovlev@yandex.ru)
+ * @since 4.04.2019
+ */
 public class DuelAttackResult
         extends AttackResult {
     private final int duelID;

@@ -6,6 +6,12 @@ import ru.job4j.domain.duels.results.DuelAttackResult;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
+/**
+ * Final blows.
+ *
+ * @author Alexander Yakovlev (sanyakovlev@yandex.ru)
+ * @since 7.04.2019
+ */
 public class FinalBlows {
     private final ConnectionHolder connectionHolder;
 
@@ -13,6 +19,10 @@ public class FinalBlows {
         this.connectionHolder = connectionHolder;
     }
 
+    /**
+     * Creates a new final blow record based on attack result.
+     * @param attackResult attack result.
+     */
     public final void create(final DuelAttackResult attackResult) {
         if (!attackResult.killed()) {
             throw new IllegalStateException(String.format(

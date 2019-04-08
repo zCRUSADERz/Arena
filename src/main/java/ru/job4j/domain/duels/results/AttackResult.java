@@ -1,5 +1,11 @@
 package ru.job4j.domain.duels.results;
 
+/**
+ * Attack result.
+ *
+ * @author Alexander Yakovlev (sanyakovlev@yandex.ru)
+ * @since 3.04.2019
+ */
 public class AttackResult {
     private final String attacker;
     private final String target;

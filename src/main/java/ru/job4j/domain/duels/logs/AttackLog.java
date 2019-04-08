@@ -1,5 +1,11 @@
 package ru.job4j.domain.duels.logs;
 
+/**
+ * Attack log.
+ *
+ * @author Alexander Yakovlev (sanyakovlev@yandex.ru)
+ * @since 3.04.2019
+ */
 public class AttackLog {
     private final String attackerName;
     private final String targetName;
@@ -12,6 +18,11 @@ public class AttackLog {
         this.damage = damage;
     }
 
+    /**
+     * Prepare and print for user.
+     * @param userName user name.
+     * @return prepared log entry.
+     */
     public final String printFor(final String userName) {
         final String result;
         if (this.attackerName.equals(userName)) {

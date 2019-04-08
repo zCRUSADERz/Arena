@@ -7,6 +7,12 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Collection;
 
+/**
+ * Active duel log.
+ *
+ * @author Alexander Yakovlev (sanyakovlev@yandex.ru)
+ * @since 6.04.2019
+ */
 public class ActiveDuelLog {
     private final int duelID;
     private final ConnectionHolder connectionHolder;
@@ -17,18 +23,27 @@ public class ActiveDuelLog {
         this.connectionHolder = connectionHolder;
     }
 
+    /**
+     * Prepares all the necessary information for rendering the page.
+     * @param userName prepares for user.
+     * @return collection of log lines for user.
+     */
     public final Collection<String> attributesFor(final String userName) {
         final String query = ""
                 + "SELECT attacker_name, target_name, damage "
                 + "FROM attack_log  WHERE duel_id = ? "
                 + "ORDER BY time";
-        return new DuelLog(
+        return new DuelAttackLog(
                 this.duelID,
                 query,
                 this.connectionHolder
         ).attributesFor(userName);
     }
 
+    /**
+     * Creates a new entry in the attack log.
+     * @param attackResult attack result.
+     */
     public final void create(final DuelAttackResult attackResult) {
         if (attackResult.duelID() != this.duelID) {
             throw new IllegalStateException(String.format(

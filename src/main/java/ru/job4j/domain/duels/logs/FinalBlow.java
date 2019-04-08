@@ -6,6 +6,12 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+/**
+ * Final blow.
+ *
+ * @author Alexander Yakovlev (sanyakovlev@yandex.ru)
+ * @since 3.04.2019
+ */
 public class FinalBlow {
     private final int duelID;
     private final ConnectionHolder connectionHolder;
@@ -15,10 +21,18 @@ public class FinalBlow {
         this.connectionHolder = connectionHolder;
     }
 
+    /**
+     * Prepares all the necessary information for rendering the page.
+     * @param userName prepares for user.
+     * @return final blow line for user.
+     */
     public final String attributesFor(final String userName) {
         return this.log().printFor(userName);
     }
 
+    /**
+     * @return final blow log.
+     */
     public final FinalBlowLog log() {
         final FinalBlowLog result;
         final String insertQuery = ""
