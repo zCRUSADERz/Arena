@@ -3,6 +3,12 @@ package ru.job4j.domain.duels.duel;
 import java.util.Collection;
 import java.util.Map;
 
+/**
+ * Duel attributes.
+ *
+ * @author Alexander Yakovlev (sanyakovlev@yandex.ru)
+ * @since 6.04.2019
+ */
 public class DuelAttributes {
     private final Map<String, String> attr;
     private final Collection<String> logAttr;

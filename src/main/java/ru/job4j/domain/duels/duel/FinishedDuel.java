@@ -11,6 +11,12 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.function.IntFunction;
 
+/**
+ * Finished duel.
+ *
+ * @author Alexander Yakovlev (sanyakovlev@yandex.ru)
+ * @since 4.04.2019
+ */
 public class FinishedDuel {
     private final int duelID;
     private final ConnectionHolder connectionHolder;
@@ -26,6 +32,11 @@ public class FinishedDuel {
         this.duelLogFactory = duelLogFactory;
     }
 
+    /**
+     * Prepares all the necessary information for rendering the page.
+     * @param userName prepares for user.
+     * @return DuelAttributes.
+     */
     public final DuelAttributes attributesFor(final String userName) {
         final Map<String, String> attr;
         final PairOfDuelist<FinishedDuelist> pair = this.duelists();
@@ -33,10 +44,15 @@ public class FinishedDuel {
         attr.put("finished", "true");
         return new DuelAttributes(
                 attr,
-                this.log().attributesFor(userName)
+                this.duelLogFactory
+                        .apply(this.duelID)
+                        .attributesFor(userName)
         );
     }
 
+    /**
+     * @return a couple of duelists for this duel.
+     */
     public final PairOfDuelist<FinishedDuelist> duelists() {
         final String query = ""
                 + "SELECT ds.user_name "
@@ -49,9 +65,5 @@ public class FinishedDuel {
                 query,
                 this.finishedDuelistFactory
         ).duelists();
-    }
-
-    public final FinishedDuelLog log() {
-        return this.duelLogFactory.apply(this.duelID);
     }
 }

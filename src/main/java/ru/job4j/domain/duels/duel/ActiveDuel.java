@@ -15,6 +15,12 @@ import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
+/**
+ * Active duel.
+ *
+ * @author Alexander Yakovlev (sanyakovlev@yandex.ru)
+ * @since 6.04.2019
+ */
 public class ActiveDuel {
     private final int duelId;
     private final ConnectionHolder connectionHolder;
@@ -30,6 +36,11 @@ public class ActiveDuel {
         this.activeDuelistFactory = activeDuelistFactory;
     }
 
+    /**
+     * Prepares all the necessary information for rendering the page.
+     * @param userName prepares for user.
+     * @return DuelAttributes.
+     */
     public final DuelAttributes attributesFor(final String userName) {
         final Map<String, String> attr = new HashMap<>();
         final PairOfDuelist<ActiveDuelist> pair = this.duelists();
@@ -51,6 +62,9 @@ public class ActiveDuel {
         );
     }
 
+    /**
+     * @return a couple of duelists for this duel.
+     */
     public final PairOfDuelist<ActiveDuelist> duelists() {
         final String query = ""
                 + "SELECT ds.user_name "
@@ -65,10 +79,16 @@ public class ActiveDuel {
         ).duelists();
     }
 
+    /**
+     * @return true, if the delay time of the start for this duel has passed.
+     */
     public final boolean started() {
         return this.startTimer() <= 0;
     }
 
+    /**
+     * @return the time remaining before the start of this duel.
+     */
     public final long startTimer() {
         final int result;
         final String query = ""
@@ -98,6 +118,11 @@ public class ActiveDuel {
         return result;
     }
 
+    /**
+     * Performs move for this user.
+     * @param userName user name.
+     * @return duel attack result.
+     */
     public final DuelAttackResult turn(final String userName) {
         if (!this.started()) {
             throw new IllegalStateException(String.format(
@@ -120,6 +145,12 @@ public class ActiveDuel {
         return attackResult;
     }
 
+    /**
+     * Add a couple of duelists to this duel.
+     * In a duel there can be only two duelists.
+     * @param first duelist.
+     * @param second duelist.
+     */
     public final void addDuelers(final String first, final String second) {
         final Consumer<String> addDueler =  userName -> {
             final String query = ""
