@@ -56,15 +56,6 @@
         <url-pattern>/arena/duel</url-pattern>
     </servlet-mapping>
 
-    <servlet>
-        <servlet-name>DuelHistory</servlet-name>
-        <servlet-class>ru.job4j.servlets.DuelHistory</servlet-class>
-    </servlet>
-    <servlet-mapping>
-        <servlet-name>DuelHistory</servlet-name>
-        <url-pattern>/arena/duel/history</url-pattern>
-    </servlet-mapping>
-
     <!-- =================================================================== -->
 
     <servlet>
