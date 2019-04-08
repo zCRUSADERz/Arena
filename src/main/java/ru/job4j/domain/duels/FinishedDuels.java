@@ -9,6 +9,12 @@ import java.sql.SQLException;
 import java.util.Optional;
 import java.util.function.IntFunction;
 
+/**
+ * Finished duels.
+ *
+ * @author Alexander Yakovlev (sanyakovlev@yandex.ru)
+ * @since 7.04.2019
+ */
 public class FinishedDuels {
     private final ConnectionHolder connectionHolder;
     private final IntFunction<FinishedDuel> finishedDuelFactory;
@@ -19,6 +25,11 @@ public class FinishedDuels {
         this.finishedDuelFactory = finishedDuelFactory;
     }
 
+    /**
+     * Finds the last completed duel for the user.
+     * @param userName user name.
+     * @return optional of last finished duel.
+     */
     public final Optional<FinishedDuel> last(final String userName) {
         final Optional<FinishedDuel> result;
         final String query = ""

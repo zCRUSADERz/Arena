@@ -13,6 +13,12 @@ import java.sql.Statement;
 import java.util.function.Function;
 import java.util.function.IntFunction;
 
+/**
+ * Duels simple.
+ *
+ * @author Alexander Yakovlev (sanyakovlev@yandex.ru)
+ * @since 6.04.2019
+ */
 public class DuelsSimple implements Duels {
     private final ConnectionHolder connectionHolder;
     private final IntFunction<ActiveDuel> activeDuelFactory;
@@ -28,6 +34,9 @@ public class DuelsSimple implements Duels {
         this.userFactory = userFactory;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public final void create(final String first, final String second) {
         final int duelID;
         try (final Statement statement
@@ -53,6 +62,9 @@ public class DuelsSimple implements Duels {
         activeDuel.addDuelers(first, second);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public final void userTurn(final int duelID, final String userName) {
         final ActiveDuel activeDuel = this.activeDuelFactory.apply(duelID);
         final DuelAttackResult attackResult = activeDuel.turn(userName);
@@ -65,6 +77,11 @@ public class DuelsSimple implements Duels {
         }
     }
 
+    /**
+     * Transfers active duel data to history tables
+     * and creates an entry in the final blow table.
+     * @param attackResult attack result.
+     */
     public final void finished(final DuelAttackResult attackResult) {
         try {
             final String copyDuel = ""
