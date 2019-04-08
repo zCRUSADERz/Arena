@@ -6,6 +6,12 @@ import ru.job4j.domain.duels.results.AttackResult;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
+/**
+ * User.
+ *
+ * @author Alexander Yakovlev (sanyakovlev@yandex.ru)
+ * @since 5.04.2019
+ */
 public class User {
     private final String userName;
     private final ConnectionHolder connectionHolder;
@@ -15,6 +21,10 @@ public class User {
         this.connectionHolder = connectionHolder;
     }
 
+    /**
+     * Improve user attributes based on attack result.
+     * @param attackResult attack result.
+     */
     public final void upgrade(final AttackResult attackResult) {
         if (!attackResult.killed()) {
             throw new IllegalStateException(String.format(

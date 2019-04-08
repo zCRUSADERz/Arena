@@ -8,6 +8,12 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Arrays;
 
+/**
+ * Users.
+ *
+ * @author Alexander Yakovlev (sanyakovlev@yandex.ru)
+ * @since 2.04.2019
+ */
 public class Users {
     private final ConnectionHolder connectionHolder;
 
@@ -15,6 +21,12 @@ public class Users {
         this.connectionHolder = connectionHolder;
     }
 
+    /**
+     * Authorize user by credentials submitted.
+     * @param userCredentials user credentials.
+     * @return authentication result. Registered user or not, as well
+     * as the result of verification of credentials if registered.
+     */
     public final AuthenticationResult authorize(
             final UserCredentials userCredentials) {
         final AuthenticationResult result;
@@ -40,6 +52,11 @@ public class Users {
         return result;
     }
 
+    /**
+     * Register user with submitted credentials.
+     * @param user user credentials.
+     * @return true, if registered.
+     */
     public final boolean register(final UserCredentials user) {
         final boolean result;
         final String insert = "INSERT INTO users (name, password) VALUE (?, ?)";
