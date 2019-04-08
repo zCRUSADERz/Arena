@@ -7,6 +7,12 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Map;
 
+/**
+ * Finished duelist.
+ *
+ * @author Alexander Yakovlev (sanyakovlev@yandex.ru)
+ * @since 6.04.2019
+ */
 public class FinishedDuelist implements SimpleDuelist {
     private final String userName;
     private final int duelID;

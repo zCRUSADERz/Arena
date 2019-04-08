@@ -8,7 +8,7 @@ import java.util.Map;
  * Pair of duelist.
  *
  * @author Alexander Yakovlev (sanyakovlev@yandex.ru)
- * @since 6.04.2019
+ * @since 3.04.2019
  */
 public class PairOfDuelist<T extends SimpleDuelist> {
     private final T first;
