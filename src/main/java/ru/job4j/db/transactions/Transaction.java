@@ -4,6 +4,14 @@ import ru.job4j.db.ConnectionHolder;
 
 import java.sql.SQLException;
 
+/**
+ * Transaction.
+ *
+ * Close and rollback running as needed in the CloseConnection filter.
+ *
+ * @author Alexander Yakovlev (sanyakovlev@yandex.ru)
+ * @since 07.04.2019
+ */
 public class Transaction {
     private final ConnectionHolder connectionHolder;
 
@@ -11,6 +19,9 @@ public class Transaction {
         this.connectionHolder = connectionHolder;
     }
 
+    /**
+     * Start transaction.
+     */
     public final void start() {
         try {
             this.connectionHolder.connection().setAutoCommit(false);
@@ -19,6 +30,9 @@ public class Transaction {
         }
     }
 
+    /**
+     * Commit.
+     */
     public final void commit() {
         try {
             this.connectionHolder.connection().commit();
@@ -27,6 +41,9 @@ public class Transaction {
         }
     }
 
+    /**
+     * Complete the transaction.
+     */
     public final void finish() {
         try {
             this.connectionHolder.connection().setAutoCommit(true);
