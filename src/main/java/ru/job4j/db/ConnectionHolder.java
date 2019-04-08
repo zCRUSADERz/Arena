@@ -19,6 +19,14 @@ public class ConnectionHolder implements AutoCloseable {
      */
     private final ThreadLocal<Boolean> holdsNow;
 
+    public ConnectionHolder(final DataSource dataSource) {
+        this(
+                dataSource,
+                new ThreadLocal<>(),
+                ThreadLocal.withInitial(() -> false)
+        );
+    }
+
     public ConnectionHolder(final DataSource dataSource,
                             final ThreadLocal<Connection> connectionHolder,
                             final ThreadLocal<Boolean> holdsNow) {

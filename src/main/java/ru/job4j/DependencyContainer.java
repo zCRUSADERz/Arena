@@ -27,7 +27,20 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.function.Function;
 import java.util.function.IntFunction;
 
+/**
+ * Dependency container.
+ *
+ * Second entry point after servlet initialization.
+ * In this class there is no execution of any business logic,
+ * only instantiation of all necessary objects.
+ *
+ * @author Alexander Yakovlev (sanyakovlev@yandex.ru)
+ * @since 5.04.2019
+ */
 public class DependencyContainer {
+    /**
+     * Turn duration in milliseconds.
+     */
     private final static int TURN_DURATION;
     private final static ConnectionHolder CONNECTION_HOLDER;
     private final static ThreadLocal<Integer> QUERY_COUNTER;
@@ -45,7 +58,9 @@ public class DependencyContainer {
     static {
         TURN_DURATION = 10000;
         final int duelStartDelay = 30;
+        //Not a valid username to use as a null-object
         final String defaultUserName = "";
+        //Password salt for hashing.
         final String passSalt = "8w@8c4!48kww&0g";
         QUERY_COUNTER = ThreadLocal.withInitial(() -> 0);
         QUERY_TIMER = ThreadLocal.withInitial(() -> 0L);
@@ -61,9 +76,7 @@ public class DependencyContainer {
                                         QUERY_TIMER
                                 )
                         )
-                ),
-                new ThreadLocal<>(),
-                ThreadLocal.withInitial(() -> false)
+                )
         );
         final Transaction transaction = new Transaction(CONNECTION_HOLDER);
         ACTIVE_DUEL_FACTORY = duelID ->
@@ -98,6 +111,7 @@ public class DependencyContainer {
                 )
         );
         USERS_QUEUE = new UsersQueue();
+        // Users duel queue consumer.
         new Thread(
                 new UsersQueueConsumer(
                         usersQueue(),
