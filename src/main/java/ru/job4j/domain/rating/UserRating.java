@@ -7,6 +7,12 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Map;
 
+/**
+ * User rating.
+ *
+ * @author Alexander Yakovlev (sanyakovlev@yandex.ru)
+ * @since 4.04.2019
+ */
 public class UserRating {
     private final String userName;
     private final ConnectionHolder connectionHolder;
@@ -17,6 +23,11 @@ public class UserRating {
         this.connectionHolder = connectionHolder;
     }
 
+    /**
+     * Prepares all rating data for the user.
+     * Key attributes: rating, victories, defeat.
+     * @return map attribute -> string data.
+     */
     public final Map<String, String> attributes() {
         final Map<String, String> result;
         final String query = ""
