@@ -19,11 +19,20 @@ public class FinishedDuelist implements SimpleDuelist {
         this.connectionHolder = connectionHolder;
     }
 
+    /**
+     * @return user name.
+     */
     @Override
     public String name() {
         return this.userName;
     }
 
+    /**
+     * Prepares all the necessary information for rendering the page.
+     * Includes: user damage, start_health, health.
+     * @param name prepares for user.
+     * @return duelist attributes.
+     */
     public final Map<String, String> attributesFor(final String name) {
         final Map<String, String> result;
         final String query = ""

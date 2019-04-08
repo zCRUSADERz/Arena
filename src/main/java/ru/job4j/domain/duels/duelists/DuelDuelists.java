@@ -7,6 +7,15 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.function.Function;
 
+/**
+ * Duel duelist.
+ *
+ * A class whose goal is to eliminate duplicate code
+ * between ActiveDuels and FinishedDuel.
+ *
+ * @author Alexander Yakovlev (sanyakovlev@yandex.ru)
+ * @since 6.04.2019
+ */
 public class DuelDuelists<T extends SimpleDuelist> {
     private final int duelId;
     private final ConnectionHolder connectionHolder;
@@ -23,6 +32,9 @@ public class DuelDuelists<T extends SimpleDuelist> {
         this.duelistsFactory = duelistsFactory;
     }
 
+    /**
+     * @return a couple of duelists for this duel.
+     */
     public final PairOfDuelist<T> duelists() {
         final PairOfDuelist<T> result;
         try (final PreparedStatement statement

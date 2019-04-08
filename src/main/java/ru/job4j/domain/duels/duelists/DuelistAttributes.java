@@ -4,6 +4,15 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Map;
 
+/**
+ * Duelist attributes.
+ *
+ * A class whose goal is to eliminate duplicate code
+ * between ActiveDuelist and FinishedDuelist.
+ *
+ * @author Alexander Yakovlev (sanyakovlev@yandex.ru)
+ * @since 6.04.2019
+ */
 public class DuelistAttributes {
     private final String userName;
     private final ResultSet resultSet;
@@ -13,6 +22,12 @@ public class DuelistAttributes {
         this.resultSet = resultSet;
     }
 
+    /**
+     * Prepares all the necessary information for rendering the page.
+     * Includes: attributes duelists: name, damage, start_health, health.
+     * @param name prepares for user.
+     * @return duelists attributes.
+     */
     public final Map<String, String> attributesFor(final String name) {
         final Map<String, String> result;
         try {
