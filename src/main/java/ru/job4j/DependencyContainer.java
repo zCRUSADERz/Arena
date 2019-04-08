@@ -35,7 +35,7 @@ import java.util.function.IntFunction;
  * only instantiation of all necessary objects.
  *
  * @author Alexander Yakovlev (sanyakovlev@yandex.ru)
- * @since 5.04.2019
+ * @since 2.04.2019
  */
 public class DependencyContainer {
     /**
@@ -58,9 +58,9 @@ public class DependencyContainer {
     static {
         TURN_DURATION = 10000;
         final int duelStartDelay = 30;
-        //Not a valid username to use as a null-object
+        // Not a valid username to use as a null-object
         final String defaultUserName = "";
-        //Password salt for hashing.
+        // Password salt for hashing.
         final String passSalt = "8w@8c4!48kww&0g";
         QUERY_COUNTER = ThreadLocal.withInitial(() -> 0);
         QUERY_TIMER = ThreadLocal.withInitial(() -> 0L);

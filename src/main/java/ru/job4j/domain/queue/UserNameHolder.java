@@ -2,11 +2,16 @@ package ru.job4j.domain.queue;
 
 import java.util.concurrent.atomic.AtomicReference;
 
+/**
+ * User name holder.
+ *
+ * @author Alexander Yakovlev (sanyakovlev@yandex.ru)
+ * @since 2.04.2019
+ */
 public class UserNameHolder {
     private final AtomicReference<String> nameHolder;
     /**
-     * Не действительное имя пользователя.
-     * Используется вместо null-reference в AtomicReference.
+     * Not a valid username to use as a null-object in AtomicReference.
      */
     private final String defaultName;
 
@@ -21,7 +26,7 @@ public class UserNameHolder {
     }
 
     /**
-     * Очищает хранилище если в нем хранилось это имя.
+     * Clears the repository if this name is stored in it.
      * @param userName user name.
      */
     public final void remove(final String userName) {
@@ -37,8 +42,8 @@ public class UserNameHolder {
     }
 
     /**
-     * Очищает хранилище. Возвращает хранимое имя, если хранилище не было пусто.
-     * Возвращает defaultUser, если хранилище было пусто.
+     * Clears the vault. Returns the stored name if the vault was not empty.
+     * Returns defaultUser if the repository was empty.
      * @param defaultUser default user name.
      * @return stored user name or default user name.
      */

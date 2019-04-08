@@ -4,6 +4,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.job4j.domain.duels.Duels;
 
+/**
+ * Users queue consumer.
+ *
+ * Removes users from the queue and forms a pair of duelists.
+ * After forming a pair makes a request to create a duel.
+ *
+ * @author Alexander Yakovlev (sanyakovlev@yandex.ru)
+ * @since 2.04.2019
+ */
 public class UsersQueueConsumer implements Runnable {
     private final UserNameHolder nameHolder;
     private final UsersQueue usersQueue;
@@ -25,6 +34,9 @@ public class UsersQueueConsumer implements Runnable {
         this.defaultUser = defaultUser;
     }
 
+    /**
+     * Run consumer.
+     */
     @Override
     public final void run() {
         this.usersQueue.addHolder(this.nameHolder);
@@ -40,7 +52,7 @@ public class UsersQueueConsumer implements Runnable {
                     } else {
                         try {
                             this.duels.create(first, second);
-                        } catch (final RuntimeException exception) {
+                        } catch (final Exception exception) {
                             //TODO Сделать возврат в очередь пользователей
                             // не находящихся в дуэли.
                             this.logger.error(
