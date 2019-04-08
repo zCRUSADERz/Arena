@@ -8,9 +8,18 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Map;
 
+/**
+ * Active duelist.
+ *
+ * @author Alexander Yakovlev (sanyakovlev@yandex.ru)
+ * @since 6.04.2019
+ */
 public class ActiveDuelist implements SimpleDuelist {
     private final String userName;
     private final ConnectionHolder connectionHolder;
+    /**
+     * Turn duration in milliseconds.
+     */
     private final int turnDuration;
 
     public ActiveDuelist(final String userName,
@@ -21,11 +30,20 @@ public class ActiveDuelist implements SimpleDuelist {
         this.turnDuration = turnDuration;
     }
 
+    /**
+     * @return user name.
+     */
     @Override
     public final String name() {
         return this.userName;
     }
 
+    /**
+     * Prepares all the necessary information for rendering the page.
+     * Includes: user damage, start_health, health.
+     * @param name prepares for user.
+     * @return duelist attributes.
+     */
     @Override
     public final Map<String, String> attributesFor(final String name) {
         final Map<String, String> result;
@@ -47,6 +65,9 @@ public class ActiveDuelist implements SimpleDuelist {
         return result;
     }
 
+    /**
+     * @return user damage.
+     */
     public final int damage() {
         final int result;
         final String query = ""
@@ -72,6 +93,9 @@ public class ActiveDuelist implements SimpleDuelist {
         return result;
     }
 
+    /**
+     * @return user health.
+     */
     public final int health() {
         final int result;
         final String query = ""
@@ -97,6 +121,12 @@ public class ActiveDuelist implements SimpleDuelist {
         return result;
     }
 
+    /**
+     * The user can perform a move in two cases.
+     * If his last activity was before his opponent,
+     * and if the turnTimer of the move is out.
+     * @return turn timer for this user. Timer in seconds.
+     */
     public final TurnTimer attackTimer() {
         final TurnTimer result;
         final String query = ""
@@ -144,6 +174,14 @@ public class ActiveDuelist implements SimpleDuelist {
         return result;
     }
 
+    /**
+     * Attack target duelist.
+     * The attack leads to the update of the last activity of both duelists.
+     * The last activity of the attacker is set higher than that of the attacker,
+     * to provide the next move to the attacker.
+     * @param target duelist.
+     * @return attack result.
+     */
     public final AttackResult attack(final ActiveDuelist target) {
         if (!this.attackTimer().canAttack) {
             throw new IllegalStateException(String.format(
@@ -176,6 +214,12 @@ public class ActiveDuelist implements SimpleDuelist {
         return result;
     }
 
+    /**
+     * Sets the last activity to the current time with an added activityDelay,
+     * and sets a new life value.
+     * @param activityDelay incremental delay to current time.
+     * @param newHealth new duelist health.
+     */
     public final void update(final double activityDelay, final int newHealth) {
         final String attackQuery = ""
                 + "UPDATE active_duelists "
@@ -197,6 +241,10 @@ public class ActiveDuelist implements SimpleDuelist {
         }
     }
 
+    /**
+     * Sets the last activity to the current time with an added activityDelay.
+     * @param activityDelay incremental delay to current time.
+     */
     public final void update(final double activityDelay) {
         final String attackQuery = ""
                 + "UPDATE active_duelists "
@@ -219,6 +267,9 @@ public class ActiveDuelist implements SimpleDuelist {
 
     public static class TurnTimer {
         private final boolean canAttack;
+        /**
+         * Turn timer in seconds.
+         */
         private final int timer;
 
         public TurnTimer(final boolean canAttack, final int timer) {
@@ -230,6 +281,9 @@ public class ActiveDuelist implements SimpleDuelist {
             return this.canAttack;
         }
 
+        /**
+         * @return timer in seconds.
+         */
         public final int timer() {
             return this.timer;
         }

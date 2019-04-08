@@ -38,6 +38,7 @@ public class ActiveDuel {
 
     /**
      * Prepares all the necessary information for rendering the page.
+     * Includes: duel startTimer, user turnTimer, duelists attributes, logs.
      * @param userName prepares for user.
      * @return DuelAttributes.
      */
@@ -87,7 +88,7 @@ public class ActiveDuel {
     }
 
     /**
-     * @return the time remaining before the start of this duel.
+     * @return the time remaining before the start of this duel. In seconds.
      */
     public final long startTimer() {
         final int result;
