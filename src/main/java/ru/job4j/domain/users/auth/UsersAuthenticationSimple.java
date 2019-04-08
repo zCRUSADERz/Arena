@@ -5,6 +5,12 @@ import ru.job4j.domain.users.Users;
 import java.util.Collections;
 import java.util.Map;
 
+/**
+ * Users authentication simple.
+ *
+ * @author Alexander Yakovlev (sanyakovlev@yandex.ru)
+ * @since 7.04.2019
+ */
 public class UsersAuthenticationSimple implements UsersAuthentication {
     private final Users users;
 
@@ -12,6 +18,9 @@ public class UsersAuthenticationSimple implements UsersAuthentication {
         this.users = users;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public final Map<String, String> authorize(final UnverifiedUser unverifiedUser) {
         final Map<String, String> errors;
         if (unverifiedUser.isValid()) {

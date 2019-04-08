@@ -3,6 +3,12 @@ package ru.job4j.domain.users.auth;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
+/**
+ * Message digest factory.
+ *
+ * @author Alexander Yakovlev (sanyakovlev@yandex.ru)
+ * @since 5.04.2019
+ */
 public class MessageDigestFactory {
     private final String passSalt;
 
@@ -10,6 +16,10 @@ public class MessageDigestFactory {
         this.passSalt = passSalt;
     }
 
+    /**
+     * Create MessageDigest based on SHA-512 algorithm and fixed salt.
+     * @return MessageDigest.
+     */
     public final MessageDigest messageDigest() {
         final MessageDigest result;
         try {
