@@ -26,4 +26,12 @@ public class Transaction {
             throw new IllegalStateException(ex);
         }
     }
+
+    public final void finish() {
+        try {
+            this.connectionHolder.connection().setAutoCommit(true);
+        } catch (final SQLException ex) {
+            throw new IllegalStateException(ex);
+        }
+    }
 }
