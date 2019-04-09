@@ -13,6 +13,12 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.function.Function;
 
+/**
+ * Sign in.
+ *
+ * @author Alexander Yakovlev (sanyakovlev@yandex.ru)
+ * @since 3.04.2019
+ */
 public class SignIn extends HttpServlet {
     private UsersAuthentication authentication;
     private Function<HttpServletRequest, UnverifiedUser> userFactory;

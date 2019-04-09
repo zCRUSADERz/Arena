@@ -16,10 +16,29 @@ import java.io.IOException;
 import java.util.Optional;
 import java.util.function.IntFunction;
 
+/**
+ * Duel page.
+ *
+ * The page on which either the active duel
+ * or the last duel is displayed is displayed.
+ *
+ * @author Alexander Yakovlev (sanyakovlev@yandex.ru)
+ * @since 3.04.2019
+ */
 public class DuelPage extends HttpServlet {
     private IntFunction<ActiveDuel> activeDuelFactory;
     private FinishedDuels finishedDuels;
 
+    /**
+     * Render active duel, or the last completed.
+     * To work requires an attribute "userName" from the session, and optional
+     * request attribute "attackAction". If the attribute "attackAction"
+     * is not found, then the last completed duel will be displayed.
+     * @param req req.
+     * @param resp resp.
+     * @throws ServletException ServletException.
+     * @throws IOException IOException.
+     */
     @Override
     public final void doGet(final HttpServletRequest req,
                             final HttpServletResponse resp)
@@ -58,6 +77,15 @@ public class DuelPage extends HttpServlet {
         }
     }
 
+    /**
+     * Post request designed to perform a user attack.
+     * To work requires request attribute "attackAction".
+     * If the attribute "attackAction" is not found,
+     * then user will be redirected to the duel page.
+     * @param req req.
+     * @param resp resp.
+     * @throws IOException IOException.
+     */
     @Override
     public final void doPost(final HttpServletRequest req,
                              final HttpServletResponse resp)

@@ -13,11 +13,31 @@ import java.io.IOException;
 import java.util.Optional;
 import java.util.function.Function;
 
+/**
+ * Duels page.
+ *
+ * This page displays the rating if the user is not waiting for an opponent,
+ * and the functionality for canceling the search for an opponent.
+ *
+ * @author Alexander Yakovlev (sanyakovlev@yandex.ru)
+ * @since 3.04.2019
+ */
 public class DuelsPage extends HttpServlet {
     private UsersQueue queue;
     private Function<String, UserRating> userRatingFactory;
+    /**
+     * Turn duration in seconds.
+     */
     private int turnDuration;
 
+    /**
+     * Displays the rating if the user is not waiting for an opponent,
+     * and the functionality for canceling the search for an opponent.
+     * @param req req.
+     * @param resp resp.
+     * @throws ServletException ServletException.
+     * @throws IOException IOException.
+     */
     @Override
     public final void doGet(final HttpServletRequest req,
                             final HttpServletResponse resp)
@@ -39,6 +59,13 @@ public class DuelsPage extends HttpServlet {
                 .forward(req, resp);
     }
 
+    /**
+     * Request parameter "action" with value "start" adds a user to the queue,
+     * "cancel" removes.
+     * @param req req.
+     * @param resp resp.
+     * @throws IOException IOException.
+     */
     @Override
     public final void doPost(final HttpServletRequest req,
                              final HttpServletResponse resp) throws IOException {

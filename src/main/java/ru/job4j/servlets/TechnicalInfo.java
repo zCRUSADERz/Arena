@@ -8,11 +8,24 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
+/**
+ * Technical info.
+ *
+ * @author Alexander Yakovlev (sanyakovlev@yandex.ru)
+ * @since 3.04.2019
+ */
 public class TechnicalInfo extends HttpServlet {
     private ThreadLocal<Long> requestTimer;
     private ThreadLocal<Integer> queryCounter;
     private ThreadLocal<Long> queryTimer;
 
+    /**
+     * Records all values of counters.
+     * @param req req.
+     * @param resp resp.
+     * @throws ServletException ServletException.
+     * @throws IOException IOException.
+     */
     @Override
     public final void service(final HttpServletRequest req,
                               final HttpServletResponse resp)
