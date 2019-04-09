@@ -68,7 +68,7 @@ public class UserStateFilter extends HttpFilter {
             req.setAttribute("waitingFight", true);
             req.getRequestDispatcher(req.getContextPath() + "/arena/duels")
                     .forward(req, resp);
-        }else {
+        } else {
             chain.doFilter(req, resp);
         }
     }

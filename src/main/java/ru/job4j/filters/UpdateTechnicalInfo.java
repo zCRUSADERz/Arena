@@ -5,6 +5,15 @@ import ru.job4j.DependencyContainer;
 import javax.servlet.*;
 import java.io.IOException;
 
+/**
+ * Update technical info of request.
+ *
+ * Time of the request, the number of queries to the database
+ * and the time for their execution.
+ *
+ * @author Alexander Yakovlev (sanyakovlev@yandex.ru)
+ * @since 3.04.2019
+ */
 public class UpdateTechnicalInfo implements Filter {
     private ThreadLocal<Long> requestTimer;
     private ThreadLocal<Integer> queryCounter;
@@ -17,6 +26,14 @@ public class UpdateTechnicalInfo implements Filter {
         this.queryTimer = DependencyContainer.queryTimer();
     }
 
+    /**
+     * Sets counter values to initial.
+     * @param request request.
+     * @param response response.
+     * @param chain chain.
+     * @throws IOException IOException.
+     * @throws ServletException ServletException.
+     */
     @Override
     public final void doFilter(final ServletRequest request,
                                final ServletResponse response,

@@ -10,9 +10,23 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpFilter;
 import java.util.Optional;
 
+/**
+ * Close connection.
+ *
+ * @author Alexander Yakovlev (sanyakovlev@yandex.ru)
+ * @since 5.04.2019
+ */
 public class CloseConnection extends HttpFilter {
     private ConnectionHolder connectionHolder;
 
+    /**
+     * Commit, setAutoCommit(true) and closes the connection if it was open.
+     * If chain.doFilter throws some exception, it will be rolled back.
+     * @param req request.
+     * @param res response.
+     * @param chain chain.
+     * @throws ServletException ServletException.
+     */
     @Override
     public final void doFilter(final ServletRequest req,
                                final ServletResponse res,
@@ -20,7 +34,7 @@ public class CloseConnection extends HttpFilter {
         try (final ConnectionHolder holder = this.connectionHolder) {
             Optional<Exception> optException = Optional.empty();
             try {
-                super.doFilter(req, res, chain);
+                chain.doFilter(req, res);
                 this.connectionHolder.commit();
             } catch (final Exception ex) {
                 optException = Optional.of(ex);
