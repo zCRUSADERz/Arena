@@ -1,8 +1,7 @@
 package ru.job4j.servlets;
 
 import ru.job4j.DependencyContainer;
-import ru.job4j.domain.users.auth.UnverifiedUser;
-import ru.job4j.domain.users.auth.UsersAuthentication;
+import ru.job4j.domain.users.UnverifiedUser;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -20,7 +19,6 @@ import java.util.function.Function;
  * @since 3.04.2019
  */
 public class SignIn extends HttpServlet {
-    private UsersAuthentication authentication;
     private Function<HttpServletRequest, UnverifiedUser> userFactory;
 
     @Override
@@ -37,10 +35,13 @@ public class SignIn extends HttpServlet {
                              final HttpServletResponse resp)
             throws ServletException, IOException {
         final UnverifiedUser user = this.userFactory.apply(req);
-        final Map<String, String> errors = this.authentication.authorize(user);
+        final Map<String, String> errors = user.authorize();
         if (errors.isEmpty()) {
             HttpSession session = req.getSession();
-            session.setAttribute("userName", user.name());
+            session.setAttribute(
+                    "userName",
+                    req.getParameter("name")
+            );
             resp.sendRedirect(req.getContextPath() + "/arena");
         } else {
             errors.forEach(req::setAttribute);
@@ -51,7 +52,6 @@ public class SignIn extends HttpServlet {
     @Override
     public final void init() throws ServletException {
         super.init();
-        this.authentication = DependencyContainer.usersAuthentication();
         this.userFactory = DependencyContainer.usersFactory();
     }
 }

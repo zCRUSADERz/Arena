@@ -1,7 +1,6 @@
 package ru.job4j.db.transactions;
 
-import ru.job4j.domain.users.auth.UnverifiedUser;
-import ru.job4j.domain.users.auth.UsersAuthentication;
+import ru.job4j.domain.users.auth.UserAuthorization;
 
 import java.util.Map;
 
@@ -11,26 +10,24 @@ import java.util.Map;
  * @author Alexander Yakovlev (sanyakovlev@yandex.ru)
  * @since 07.04.2019
  */
-public class AuthTransaction implements UsersAuthentication {
+public class AuthTransaction implements UserAuthorization {
     private final Transaction transaction;
-    private final UsersAuthentication origin;
+    private final UserAuthorization origin;
 
     public AuthTransaction(final Transaction transaction,
-                           final UsersAuthentication origin) {
+                           final UserAuthorization origin) {
         this.transaction = transaction;
         this.origin = origin;
     }
 
     /**
      * Start and complete transaction for user authorization.
-     * @param unverifiedUser user.
      * @return result of origin UsersAuthentication.
      */
     @Override
-    public final Map<String, String> authorize(
-            final UnverifiedUser unverifiedUser) {
+    public final Map<String, String> authorize() {
         this.transaction.start();
-        final Map<String, String> result = this.origin.authorize(unverifiedUser);
+        final Map<String, String> result = this.origin.authorize();
         this.transaction.commit();
         return result;
     }

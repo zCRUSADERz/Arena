@@ -16,12 +16,11 @@ import ru.job4j.domain.duels.logs.FinishedDuelLog;
 import ru.job4j.domain.queue.UsersQueue;
 import ru.job4j.domain.queue.UsersQueueConsumer;
 import ru.job4j.domain.rating.UserRating;
+import ru.job4j.domain.users.UnverifiedUser;
 import ru.job4j.domain.users.User;
 import ru.job4j.domain.users.Users;
 import ru.job4j.domain.users.auth.MessageDigestFactory;
-import ru.job4j.domain.users.auth.UnverifiedUser;
-import ru.job4j.domain.users.auth.UsersAuthentication;
-import ru.job4j.domain.users.auth.UsersAuthenticationSimple;
+import ru.job4j.domain.users.auth.UserAuthorizationImpl;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.function.Function;
@@ -47,7 +46,6 @@ public class DependencyContainer {
     private final static ThreadLocal<Long> QUERY_TIMER;
     private final static ThreadLocal<Long> REQUEST_TIMER;
     private final static Function<HttpServletRequest, UnverifiedUser> USERS_FACTORY;
-    private final static UsersAuthentication USERS_AUTHENTICATION;
     private final static Function<String, UserRating> USERS_RATING;
     private final static UsersQueue USERS_QUEUE;
     private final static Duels DUELS;
@@ -93,12 +91,14 @@ public class DependencyContainer {
             );
         USERS_FACTORY = httpRequest -> new UnverifiedUser(
                 httpRequest,
-                new MessageDigestFactory(passSalt).messageDigest()
-        );
-        USERS_AUTHENTICATION = new AuthTransaction(
-                transaction,
-                new UsersAuthenticationSimple(
-                        new Users(CONNECTION_HOLDER)
+                new MessageDigestFactory(passSalt).messageDigest(),
+                (userName, passwordHash) -> new AuthTransaction(
+                        transaction,
+                        new UserAuthorizationImpl(
+                                userName, passwordHash,
+                                CONNECTION_HOLDER,
+                                new Users(CONNECTION_HOLDER)
+                        )
                 )
         );
         DUELS = new DuelCreateTransaction(
@@ -160,10 +160,6 @@ public class DependencyContainer {
 
     public static ThreadLocal<Long> queryTimer() {
         return QUERY_TIMER;
-    }
-
-    public static UsersAuthentication usersAuthentication() {
-        return USERS_AUTHENTICATION;
     }
 
     public static UsersQueue usersQueue() {
