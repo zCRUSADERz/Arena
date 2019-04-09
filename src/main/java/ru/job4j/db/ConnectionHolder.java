@@ -76,7 +76,9 @@ public class ConnectionHolder implements AutoCloseable {
      */
     public final void commit() throws SQLException {
         if (this.holdsNow.get()) {
-            this.connectionHolder.get().commit();
+            if (!this.connectionHolder.get().getAutoCommit()) {
+                this.connectionHolder.get().commit();
+            }
         }
     }
 

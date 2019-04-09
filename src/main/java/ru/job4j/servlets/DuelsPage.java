@@ -10,6 +10,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
+import java.util.Optional;
 import java.util.function.Function;
 
 public class DuelsPage extends HttpServlet {
@@ -21,9 +22,10 @@ public class DuelsPage extends HttpServlet {
     public final void doGet(final HttpServletRequest req,
                             final HttpServletResponse resp)
             throws ServletException, IOException {
-        final boolean waitingFight
-                = (Boolean) req.getAttribute("waitingFight");
-        if (waitingFight) {
+        final Optional<Boolean> waitingFight = Optional.ofNullable(
+                (Boolean) req.getAttribute("waitingFight")
+        );
+        if (waitingFight.isPresent()) {
             req.setAttribute("turnDuration", this.turnDuration);
         } else {
             HttpSession session = req.getSession();
@@ -43,16 +45,17 @@ public class DuelsPage extends HttpServlet {
         HttpSession session = req.getSession();
         final String userName = (String) session.getAttribute("userName");
         final String action = req.getParameter("action");
-        final boolean waitingFight
-                = (Boolean) req.getAttribute("waitingFight");
-        if ("start".equals(action) && !waitingFight) {
+        final Optional<Boolean> waitingFight = Optional.ofNullable(
+                (Boolean) req.getAttribute("waitingFight")
+        );
+        if ("start".equals(action) && waitingFight.isEmpty()) {
             try {
                 this.queue.offer(userName);
                 Thread.sleep(100);
             } catch (InterruptedException ex) {
                 throw new IllegalStateException(ex);
             }
-        } else if ("cancel".equals(action) && waitingFight) {
+        } else if ("cancel".equals(action) && waitingFight.isPresent()) {
             this.queue.remove(userName);
         }
         resp.sendRedirect(req.getContextPath() + "/arena/duels");
