@@ -33,26 +33,30 @@ import java.util.function.Function;
 /**
  * Data source wrapper.
  *
- * @author Alexander Yakovlev (sanyakovlev@yandex.ru)
  * @since 0.1
  */
 public class DataSourceWrapper extends HikariDataSource {
+
+    /**
+     * Factory to create wrappers for database connections.
+     */
     private final Function<Connection, Connection> factory;
 
-    public DataSourceWrapper(
-            final HikariConfig config,
-            final Function<Connection, Connection> factory) {
+    /**
+     * Primary constructor.
+     * @param config Hikari configuration.
+     * @param factory Factory to create wrappers for database connections.
+     */
+    public DataSourceWrapper(final HikariConfig config,
+        final Function<Connection, Connection> factory
+    ) {
         super(config);
         this.factory = factory;
     }
 
-    /**
-     * Wraps connection in special implementation.
-     * @return wrapped connection.
-     * @throws SQLException exception.
-     */
     @Override
     public final Connection getConnection() throws SQLException {
-        return this.factory.apply(super.getConnection());
+        final Connection original = super.getConnection();
+        return this.factory.apply(original);
     }
 }
