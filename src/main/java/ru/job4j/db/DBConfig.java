@@ -26,7 +26,7 @@ public class DBConfig {
      * @return Hikari config.
      */
     public final HikariConfig config() {
-        HikariConfig config = new HikariConfig();
+        final HikariConfig config = new HikariConfig();
         config.setDriverClassName("com.mysql.cj.jdbc.Driver");
         config.setJdbcUrl(
                 "jdbc:mysql://localhost:3306/Arena"

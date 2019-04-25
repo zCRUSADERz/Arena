@@ -1,11 +1,43 @@
+/*
+ * The MIT License (MIT)
+ *
+ * Copyright (c) 2019 Yakovlev Alexander
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package ru.job4j;
 
-import ru.job4j.db.*;
+import ru.job4j.db.ConnectionHolder;
+import ru.job4j.db.DBConfig;
 import ru.job4j.db.transactions.ActiveDuelsTransaction;
 import ru.job4j.db.transactions.AuthTransaction;
 import ru.job4j.db.transactions.DuelCreateTransaction;
 import ru.job4j.db.transactions.Transaction;
-import ru.job4j.domain.duels.*;
+import ru.job4j.db.wrappers.ConnectionWrapper;
+import ru.job4j.db.wrappers.DataSourceWrapper;
+import ru.job4j.db.wrappers.PreparedStatementWrapper;
+import ru.job4j.db.wrappers.StatementWrapper;
+import ru.job4j.domain.duels.ActiveDuels;
+import ru.job4j.domain.duels.ActiveDuelsSimple;
+import ru.job4j.domain.duels.Duels;
+import ru.job4j.domain.duels.DuelsSimple;
+import ru.job4j.domain.duels.FinishedDuels;
 import ru.job4j.domain.duels.duel.ActiveDuel;
 import ru.job4j.domain.duels.duel.FinishedDuel;
 import ru.job4j.domain.duels.duelists.ActiveDuelist;
@@ -36,22 +68,23 @@ import java.util.function.IntFunction;
  * @author Alexander Yakovlev (sanyakovlev@yandex.ru)
  * @since 2.04.2019
  */
+@SuppressWarnings("resource")
 public class DependencyContainer {
     /**
      * Turn duration in milliseconds.
      */
-    private final static int TURN_DURATION;
-    private final static ConnectionHolder CONNECTION_HOLDER;
-    private final static ThreadLocal<Integer> QUERY_COUNTER;
-    private final static ThreadLocal<Long> QUERY_TIMER;
-    private final static ThreadLocal<Long> REQUEST_TIMER;
-    private final static Function<HttpServletRequest, UnverifiedUser> USERS_FACTORY;
-    private final static Function<String, UserRating> USERS_RATING;
-    private final static UsersQueue USERS_QUEUE;
-    private final static Duels DUELS;
-    private final static ActiveDuels ACTIVE_DUELS;
-    private final static FinishedDuels FINISHED_DUELS;
-    private final static IntFunction<ActiveDuel> ACTIVE_DUEL_FACTORY;
+    private static final int TURN_DURATION;
+    private static final ConnectionHolder CONNECTION_HOLDER;
+    private static final ThreadLocal<Integer> QUERY_COUNTER;
+    private static final ThreadLocal<Long> QUERY_TIMER;
+    private static final ThreadLocal<Long> REQUEST_TIMER;
+    private static final Function<HttpServletRequest, UnverifiedUser> USERS_FACTORY;
+    private static final Function<String, UserRating> USERS_RATING;
+    private static final UsersQueue USERS_QUEUE;
+    private static final Duels DUELS;
+    private static final ActiveDuels ACTIVE_DUELS;
+    private static final FinishedDuels FINISHED_DUELS;
+    private static final IntFunction<ActiveDuel> ACTIVE_DUEL_FACTORY;
 
     static {
         TURN_DURATION = 10000;
@@ -64,17 +97,18 @@ public class DependencyContainer {
         QUERY_TIMER = ThreadLocal.withInitial(() -> 0L);
         REQUEST_TIMER = ThreadLocal.withInitial(() -> 0L);
         CONNECTION_HOLDER = new ConnectionHolder(
-                new DataSourceWrapper(
-                        new DBConfig().config(),
-                        connection -> new ConnectionHandler(
-                                connection,
-                                statement -> new StatementHandler(
-                                        statement,
-                                        QUERY_COUNTER,
-                                        QUERY_TIMER
-                                )
-                        )
+            new DataSourceWrapper(
+                new DBConfig().config(),
+                connection -> new ConnectionWrapper(
+                    connection,
+                    statement -> new StatementWrapper(
+                        statement, QUERY_COUNTER, QUERY_TIMER
+                    ),
+                    prepared -> new PreparedStatementWrapper(
+                        prepared, QUERY_COUNTER, QUERY_TIMER
+                    )
                 )
+            )
         );
         final Transaction transaction = new Transaction(CONNECTION_HOLDER);
         ACTIVE_DUEL_FACTORY = duelID ->
@@ -89,9 +123,10 @@ public class DependencyContainer {
                                     TURN_DURATION
                             )
             );
+        final MessageDigestFactory factory = new MessageDigestFactory(passSalt);
         USERS_FACTORY = httpRequest -> new UnverifiedUser(
                 httpRequest,
-                new MessageDigestFactory(passSalt).messageDigest(),
+                factory::messageDigest,
                 (userName, passwordHash) -> new AuthTransaction(
                         transaction,
                         new UserAuthorizationImpl(
